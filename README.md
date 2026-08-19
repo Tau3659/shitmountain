@@ -5,3 +5,5 @@
 创意方案：[`docs/创意方案.md`](docs/创意方案.md)
 
 试玩：https://tau3659.github.io/shitmountain/
+
+竖屏。整界面 64 位像素风（N64/PS1 低分夜灰、块状 HUD、点阵字）。
