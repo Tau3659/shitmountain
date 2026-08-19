@@ -109,115 +109,112 @@ function px(ctx, x, y, w, h, color) {
 function drawFace(rankId, t) {
   const ctx = faceCtx;
   const blink = Math.sin(t * 2.1) > 0.92;
-  ctx.clearRect(0, 0, 48, 48);
-  px(ctx, 0, 0, 48, 48, "#21262d");
-  px(ctx, 8, 14, 32, 28, "#e2b48a");
-  px(ctx, 14, 22, 6, 4, "#3d2918");
-  px(ctx, 28, 22, 6, 4, "#3d2918");
+  ctx.clearRect(0, 0, 32, 32);
+  px(ctx, 0, 0, 32, 32, "#12141a");
+  px(ctx, 6, 10, 20, 18, "#8a6248");
+  px(ctx, 14, 10, 12, 18, "#c8dce8");
+  px(ctx, 10, 16, 3, 3, "#1a1410");
+  px(ctx, 19, 16, 3, 3, "#1a1410");
   if (blink) {
-    px(ctx, 14, 23, 6, 2, "#e2b48a");
-    px(ctx, 28, 23, 6, 2, "#e2b48a");
+    px(ctx, 10, 17, 3, 1, "#8a6248");
+    px(ctx, 19, 17, 3, 1, "#c8dce8");
   }
-  px(ctx, 20, 28, 8, 3, "#c4896a");
+  px(ctx, 14, 21, 5, 2, "#6a5344");
   if (rankId === 0) {
-    px(ctx, 8, 8, 32, 10, "#2b2118");
-    px(ctx, 6, 14, 6, 16, "#2b2118");
-    px(ctx, 36, 14, 6, 16, "#2b2118");
+    px(ctx, 6, 4, 20, 8, "#1a1410");
+    px(ctx, 4, 10, 5, 10, "#1a1410");
+    px(ctx, 23, 10, 5, 8, "#1a1410");
   } else if (rankId === 1) {
-    px(ctx, 8, 10, 32, 6, "#3a2a1c");
-    px(ctx, 6, 14, 5, 10, "#3a2a1c");
-    px(ctx, 37, 14, 5, 10, "#3a2a1c");
-    px(ctx, 16, 12, 16, 4, "#e2b48a");
+    px(ctx, 6, 7, 20, 5, "#2a2018");
+    px(ctx, 4, 10, 4, 6, "#2a2018");
+    px(ctx, 24, 10, 4, 6, "#2a2018");
+    px(ctx, 12, 6, 10, 4, "#c8dce8");
   } else {
-    px(ctx, 10, 12, 28, 6, "#e2b48a");
-    px(ctx, 18, 10, 12, 4, "#f0d2b0");
-    px(ctx, 12, 32, 24, 4, "#c4896a");
+    px(ctx, 8, 8, 16, 4, "#c8dce8");
+    px(ctx, 14, 6, 8, 3, "#d8e8ee");
+    px(ctx, 10, 24, 12, 3, "#8a6248");
   }
 }
 
-function drawScene(t, holding, rankId, bugs) {
+function dither(ctx, x, y, w, h, a, b) {
+  px(ctx, x, y, w, h, a);
+  ctx.fillStyle = b;
+  for (let j = 0; j < h; j += 2) {
+    const odd = (j >> 1) & 1;
+    for (let i = odd; i < w; i += 2) {
+      ctx.fillRect(x + i, y + j, 1, 1);
+    }
+  }
+}
+
+function drawScene(t, holding, rankId) {
   const canvas = el.scene;
   const ctx = sceneCtx;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = canvas.clientWidth || 320;
-  const h = canvas.clientHeight || 220;
-  const cw = Math.max(160, Math.floor(w * dpr / 4) * 2);
-  const ch = Math.max(110, Math.floor(h * dpr / 4) * 2);
-  if (canvas.width !== cw || canvas.height !== ch) {
-    canvas.width = cw;
-    canvas.height = ch;
+  if (canvas.width !== 160 || canvas.height !== 120) {
+    canvas.width = 160;
+    canvas.height = 120;
     ctx.imageSmoothingEnabled = false;
   }
-  const s = Math.min(cw / 160, ch / 110);
-  ctx.setTransform(s, 0, 0, s, 0, 0);
-  const W = cw / s;
-  const H = ch / s;
-
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const k = Math.max(1.35, (H * 0.55) / 52);
-  const u = (n) => Math.max(2, Math.round(n * k));
-  const tap = Math.floor(t * 12) % 2 ? u(1) : 0;
+  const tap = Math.floor(t * 10) % 2;
 
-  px(ctx, 0, 0, W, H, "#1a1c1e");
-  px(ctx, 0, 0, W, Math.floor(H * 0.64), "#242628");
-  px(ctx, Math.floor(W * 0.62), Math.floor(H * 0.08), Math.floor(W * 0.28), Math.floor(H * 0.34), "#101214");
-  px(ctx, Math.floor(W * 0.64), Math.floor(H * 0.1), Math.floor(W * 0.11), Math.floor(H * 0.14), "#1c2430");
-  px(ctx, Math.floor(W * 0.76), Math.floor(H * 0.12), Math.floor(W * 0.1), Math.floor(H * 0.12), "#181e28");
-  px(ctx, 0, Math.floor(H * 0.6), W, u(3), "#323538");
-  px(ctx, u(4), Math.floor(H * 0.38), u(16), Math.floor(H * 0.24), "#2a2c2e");
-  px(ctx, u(6), Math.floor(H * 0.42), u(12), u(8), "#1a1c1e");
+  dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
+  px(ctx, 0, 84, 160, 36, "#2a2624");
+  px(ctx, 0, 84, 160, 6, "#3c3834");
+  px(ctx, 0, 84, 160, 1, "#4a4640");
+  px(ctx, 0, 90, 160, 1, "#1a1816");
 
-  const deskY = Math.floor(H * 0.72);
-  px(ctx, 0, deskY, W, H - deskY, "#2c2f32");
-  px(ctx, 0, deskY, W, u(10), "#3a3d40");
-  px(ctx, 0, deskY + u(10), W, u(2), "#1e2022");
+  const leak = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#5a7a88";
+  px(ctx, 94, 38, 4, 36, leak);
+  if (flashing) px(ctx, 92, 42, 3, 26, "#c8e4f0");
 
-  const cx = Math.floor(W * 0.30);
-  const monW = u(34);
-  const monH = u(50);
-  const monX = Math.floor(W * 0.66);
-  const monY = deskY - monH - u(2);
-  const leak = flashing ? "#d7e8f2" : holding ? "#8aa4b3" : "#5d717c";
-  px(ctx, monX - u(7), monY + u(6), u(7), monH - u(14), leak);
-  px(ctx, monX - u(12), monY + u(12), u(8), monH - u(24), flashing ? "#f2f7fa" : "#6d8490");
+  px(ctx, 98, 30, 50, 54, "#6a6e68");
+  px(ctx, 100, 32, 46, 48, "#3a3c3a");
+  px(ctx, 104, 36, 38, 8, "#2a2c2a");
+  px(ctx, 108, 48, 30, 2, "#4a4c4a");
+  px(ctx, 108, 52, 30, 2, "#4a4c4a");
+  px(ctx, 108, 56, 30, 2, "#4a4c4a");
+  px(ctx, 116, 78, 16, 8, "#4a4c48");
+  px(ctx, 112, 84, 24, 4, "#3a3c38");
+  px(ctx, 128, 88, 2, 12, "#2a2c2e");
+  px(ctx, 133, 90, 2, 14, "#2a2c2e");
 
-  px(ctx, monX, monY, monW, monH, "#1c1e20");
-  px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(12), "#121416");
-  px(ctx, monX + u(6), monY + u(8), monW - u(12), u(3), "#2a2d30");
-  px(ctx, monX + Math.floor(monW / 2) - u(5), monY + monH - u(10), u(10), u(8), "#2a2c2e");
-  px(ctx, monX + Math.floor(monW / 2) - u(14), deskY - u(2), u(28), u(4), "#232528");
-  px(ctx, monX - u(18), deskY - u(3), u(24), u(3), "#3e4246");
-  px(ctx, monX - u(16), deskY - u(5) + tap, u(8), u(2), "#4a4e52");
+  px(ctx, 56, 82, 38, 5, "#1c1e20");
+  px(ctx, 58, 83, 6, 2, "#3a3c40");
+  px(ctx, 66, 83, 6, 2, "#3a3c40");
+  px(ctx, 74, 83, 6, 2, "#3a3c40");
+  px(ctx, 82, 83, 8, 2, "#3a3c40");
 
-  const shirt = "#4d565e";
-  const torsoY = deskY - u(34);
-  px(ctx, cx - u(16), torsoY, u(36), u(34), shirt);
-  if (rankId === 2) {
-    px(ctx, cx - u(18), torsoY + u(14), u(40), u(20), shirt);
-  }
-  px(ctx, cx - u(2), torsoY + u(2), u(12), u(16), flashing ? "#c5d0d6" : "#8b969e");
-  const headY = torsoY - u(24);
-  const lit = flashing ? "#ffe8cc" : "#f0d0b0";
-  const shade = "#b88968";
-  px(ctx, cx - u(12), headY, u(14), u(24), shade);
-  px(ctx, cx + u(2), headY, u(16), u(24), lit);
-  px(ctx, cx + u(10), headY + u(6), u(6), u(14), flashing ? "#fff3e0" : lit);
+  const shirt = "#2a3c54";
+  px(ctx, 20, 52, 42, 32, shirt);
+  px(ctx, 22, 54, 10, 22, "#1e2c40");
+  px(ctx, 36, 48, 10, 6, flashing ? "#e8f2f6" : "#c8dce8");
+
+  const headX = 28;
+  const headY = 20;
+  px(ctx, headX, headY, 14, 30, "#8a6248");
+  px(ctx, headX + 12, headY, 14, 30, flashing ? "#e8f2f6" : "#c8dce8");
+  px(ctx, headX + 20, headY + 8, 6, 14, flashing ? "#f4fafc" : "#d4e8f0");
   if (rankId === 0) {
-    px(ctx, cx - u(14), headY - u(8), u(32), u(12), "#2b2118");
-    px(ctx, cx - u(16), headY + u(2), u(8), u(16), "#2b2118");
-    px(ctx, cx + u(16), headY + u(2), u(8), u(12), "#2b2118");
+    px(ctx, headX - 2, headY - 6, 30, 10, "#1a1410");
+    px(ctx, headX - 4, headY + 2, 8, 14, "#1a1410");
+    px(ctx, headX + 22, headY + 2, 8, 10, "#1a1410");
   } else if (rankId === 1) {
-    px(ctx, cx - u(14), headY - u(4), u(32), u(8), "#3a2a1c");
-    px(ctx, cx - u(2), headY - u(6), u(16), u(6), lit);
+    px(ctx, headX - 2, headY - 2, 30, 7, "#2a2018");
+    px(ctx, headX + 8, headY - 4, 14, 5, flashing ? "#e8f2f6" : "#c8dce8");
   } else {
-    px(ctx, cx + u(2), headY - u(4), u(14), u(5), "#e8d4b8");
+    px(ctx, headX + 10, headY - 2, 12, 4, "#d8e8ee");
+    px(ctx, headX + 2, headY + 22, 20, 3, "#8a6248");
   }
-  px(ctx, cx - u(2), headY + u(10), u(5), u(4), "#3d2918");
-  px(ctx, cx + u(8), headY + u(10), u(5), u(4), "#3d2918");
-  px(ctx, cx + u(12), headY + u(12), u(4), u(6), "#c97a6a");
-  px(ctx, cx - u(22), torsoY + u(10), u(12), u(7), shade);
-  px(ctx, cx + u(18), torsoY + u(12) + tap, u(14), u(6), lit);
-  px(ctx, cx + u(28) + tap, deskY - u(6), u(8), u(4), lit);
+  px(ctx, headX + 6, headY + 12, 3, 3, "#1a1410");
+  px(ctx, headX + 16, headY + 12, 3, 3, "#1a1410");
+  px(ctx, headX + 18, headY + 16, 3, 4, "#a07060");
+
+  px(ctx, 14, 58, 10, 18, "#8a6248");
+  px(ctx, 54, 62, 16, 8, shirt);
+  px(ctx, 66, 76 + tap, 10, 5, flashing ? "#e8f2f6" : "#c8dce8");
+  px(ctx, 72 + tap, 80, 6, 3, flashing ? "#e8f2f6" : "#a8d4e8");
 }
 
 function pushLog(text, kind) {

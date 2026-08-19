@@ -5,17 +5,18 @@
 }
 
 :root {
-  --bg: #1a1c1e;
-  --wall: #242628;
+  --bg: #12141a;
+  --wall: #1a1c1e;
   --panel: #2a2d30;
   --hi: #5a5e62;
   --lo: #0e0f10;
   --edge: #7a7e82;
   --text: #d0d4d8;
   --muted: #8b9094;
-  --ok: #5ecf6a;
+  --ok: #48d060;
   --bad: #d45a4a;
   --warn: #d4b45a;
+  --crt: #a8d4e8;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -24,9 +25,11 @@
   --bevel:
     inset 2px 2px 0 var(--hi),
     inset -2px -2px 0 var(--lo);
+  --bevel-in:
+    inset 2px 2px 0 var(--lo),
+    inset -2px -2px 0 var(--hi);
   --bevel-out:
-    2px 2px 0 var(--lo),
-    -1px -1px 0 var(--hi);
+    2px 2px 0 var(--lo);
 }
 
 * {
@@ -77,22 +80,17 @@ button {
 
 .hud {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: 8px;
-  padding: calc(8px + var(--safe-top)) calc(8px + var(--safe-right)) 6px calc(8px + var(--safe-left));
+  padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) 6px calc(12px + var(--safe-left));
   pointer-events: none;
   z-index: 2;
 }
 
 .rank-block {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--panel);
-  box-shadow: var(--bevel);
-  border: 2px solid var(--edge);
-  padding: 4px 8px 4px 4px;
+  align-items: stretch;
 }
 
 #face {
@@ -100,23 +98,31 @@ button {
   height: 40px;
   image-rendering: pixelated;
   background: var(--lo);
-  border: 2px solid var(--lo);
-  box-shadow: inset 2px 2px 0 #000;
+  border: 2px solid var(--edge);
+  box-shadow: var(--bevel);
 }
 
 .rank-name {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  min-height: 40px;
   font-size: 12px;
-  letter-spacing: 0;
   color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--edge);
+  border-left: 0;
+  box-shadow: var(--bevel);
 }
 
 .clock-out {
   pointer-events: auto;
   touch-action: none;
   margin: 0;
+  width: 44px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0;
   font: inherit;
   font-size: 12px;
   color: var(--text);
@@ -127,42 +133,37 @@ button {
 }
 
 .clock-out:active {
-  box-shadow: inset 2px 2px 0 var(--lo), inset -2px -2px 0 var(--hi);
+  box-shadow: var(--bevel-in);
 }
 
 .meters {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  min-height: 40px;
-  padding: 0 calc(8px + var(--safe-right)) 6px calc(8px + var(--safe-left));
+  padding: 0 calc(12px + var(--safe-right)) 6px calc(12px + var(--safe-left));
   font-size: 12px;
   pointer-events: none;
   overflow: visible;
-  gap: 8px;
+  gap: 6px;
 }
 
-.meter-col {
+.meter {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.meter-lines,
-.meter-good,
-.meter-bugs {
+  gap: 2px;
   font-size: 12px;
   color: var(--text);
   background: var(--lo);
   border: 2px solid var(--edge);
-  box-shadow: inset 2px 2px 0 #000, inset -2px -2px 0 var(--hi);
-  padding: 6px 8px;
+  box-shadow: var(--bevel-in);
+  padding: 6px 6px 8px;
 }
 
-.meter-lines #lines,
-.meter-good #good,
-.meter-bugs #bugs {
+.meter .lab,
+.meter #lines,
+.meter #good,
+.meter #bugs {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -179,9 +180,6 @@ button {
 }
 
 .meter-bugs {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
   transform: translateY(0);
   will-change: transform;
 }
@@ -206,16 +204,18 @@ button {
   flex: 1 1 48%;
   min-height: 42%;
   pointer-events: none;
-  border-top: 2px solid var(--lo);
-  border-bottom: 2px solid var(--lo);
+  overflow: hidden;
+  background: var(--wall);
 }
 
 #scene {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
   image-rendering: pixelated;
-  background: #1a1c1e;
+  image-rendering: crisp-edges;
+  background: var(--wall);
 }
 
 .status {
@@ -238,7 +238,7 @@ button {
   flex: 1 1 40%;
   min-height: 28%;
   height: auto;
-  margin: 0 calc(8px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(8px + var(--safe-left));
+  margin: 0 calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
   padding: 8px;
   overflow: hidden;
   background: #0a0c0e;
@@ -261,7 +261,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0c0ecc;
+  background: #12141acc;
   padding: calc(24px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
 }
 
@@ -271,8 +271,7 @@ button {
 
 .intro-copy {
   margin: 0;
-  font-size: 24px;
-  letter-spacing: 0;
+  font-size: 12px;
   background: var(--panel);
   border: 2px solid var(--edge);
   box-shadow: var(--bevel), var(--bevel-out);
@@ -291,7 +290,6 @@ button {
 .sheet-card h2 {
   margin: 0;
   font-size: 12px;
-  letter-spacing: 0;
 }
 
 .scoreboard {
@@ -300,7 +298,7 @@ button {
   padding: 8px;
   background: var(--lo);
   border: 2px solid var(--edge);
-  box-shadow: inset 2px 2px 0 #000;
+  box-shadow: var(--bevel-in);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -321,16 +319,20 @@ button {
 
 .stamp {
   margin: 12px auto 0;
-  width: 108px;
-  height: 48px;
+  width: 72px;
+  height: 72px;
   border: 2px solid var(--ok);
   color: var(--ok);
   background: #102014;
-  box-shadow: inset 2px 2px 0 #1a3a20, 2px 2px 0 var(--lo);
+  box-shadow: inset 2px 2px 0 #1a3a20, inset -2px -2px 0 #061008, 0 0 0 2px var(--ok);
+  outline: 2px solid var(--ok);
+  outline-offset: -8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .stamp.hidden { display: none; }
@@ -346,6 +348,7 @@ button {
   font: inherit;
   font-size: 12px;
   padding: 10px 12px;
+  min-width: 44px;
   min-height: 44px;
   border: 2px solid var(--edge);
   background: var(--panel);
@@ -361,7 +364,7 @@ button {
 }
 
 .sheet-actions button:active {
-  box-shadow: inset 2px 2px 0 var(--lo);
+  box-shadow: var(--bevel-in);
 }
 
 .rotate-hint {
