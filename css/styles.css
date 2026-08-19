@@ -81,8 +81,9 @@ button {
 
 .stage {
   position: relative;
-  flex: 1 1 50%;
-  min-height: 46%;
+  flex: 0 0 42dvh;
+  height: 42dvh;
+  width: 100%;
   pointer-events: none;
   overflow: hidden;
   background: var(--wall);
@@ -167,7 +168,7 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  padding: 0 calc(12px + var(--safe-right)) 6px calc(12px + var(--safe-left));
+  flex: 0 0 auto;
   font-size: 12px;
   overflow: visible;
   gap: 6px;
@@ -226,8 +227,9 @@ button {
 }
 
 .status {
-  align-self: flex-start;
-  margin: 4px 0 0 22%;
+  position: absolute;
+  left: 22%;
+  top: calc(12px + var(--safe-top) + 48px);
   font-size: 12px;
   color: var(--warn);
   background: var(--panel);
@@ -240,8 +242,8 @@ button {
 .status.slop { color: var(--warn); }
 
 .monitor {
-  flex: 1 1 50%;
-  min-height: 40%;
+  flex: 1 1 auto;
+  min-height: 0;
   pointer-events: none;
   padding: 0 calc(8px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(8px + var(--safe-left));
   display: flex;
@@ -250,8 +252,10 @@ button {
 .bezel {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  gap: 6px;
   min-height: 0;
-  padding: 10px;
+  padding: 8px;
   background: var(--panel);
   border: 2px solid var(--edge);
   box-shadow: var(--bevel);

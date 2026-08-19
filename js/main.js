@@ -23,6 +23,40 @@ const SLOP_LINES = [
   "// 临时方案 2019",
   "fix fix fix asdf",
   "export default null",
+  "await fetch('/api').then(r => r) // 没处理",
+  "if (data) if (data.data) if (data.data.data) use(data.data.data.item)",
+  "JSON.parse(localStorage.user) // 可能炸",
+  "setTimeout(save, 0); setTimeout(save, 0); setTimeout(save, 0)",
+  "return res.data.data.data.list || res || []",
+  "obj['__proto__'] = obj",
+  "for (var i = 0; i < 10; i++) { i = 0 }",
+  "console.log('debug', secretKey, token, pwd)",
+  "window.location = userUrl",
+  "document.cookie = 'admin=1; path=/'",
+  "Number(undefined) + Number(null) * '2'",
+  "try { risky() } finally { risky() }",
+  "new Date(userDate).getTime() || Date.now() || 0 || 1",
+  "arr[-1] = '垫一下'",
+  "Promise.resolve().then(() => Promise.resolve().then(loop))",
+  "cssText += 'position:fixed;' // 先顶上去",
+  "innerHTML = comment + userName",
+  "Math.random() * 0 // 够随机了",
+  "if (count == '0') count = 0; else count = count",
+  "export const API = 'http://10.0.0.3:8080'",
+  "void function(){ arguments.callee() }()",
+  "let lock = false; lock = !lock; lock = !lock",
+  "switch (type) { default: break; default: break }",
+  "fs.writeFileSync('/tmp/prod.json', JSON.stringify(state))",
+  "user.age = user.age || user.Age || user.AGE || 18",
+  "parseInt('08') + parseInt('09')",
+  "typeof NaN === 'number' && NaN == NaN",
+  "btn.onclick = btn.onclick = btn.onclick = save",
+  "// 线上先这样，周五再清",
+  "throw '别问，问就是历史包袱'",
+  "merge(a, merge(a, merge(a, b)))",
+  "cache[key] = cache[key] || cache[key] || uncached()",
+  "id = id || ids[0] || ids[ids.length] || 'id'",
+  "sleep(5000) // 等接口自己好",
 ];
 
 const GOOD_LINES = [
@@ -34,6 +68,26 @@ const GOOD_LINES = [
   "try { await load() } catch (e) { log(e) }",
   "export function clamp(v, a, b)",
   "query.selectAll('.bug').forEach(fix)",
+  "const safe = Number.isFinite(n) ? n : 0",
+  "if (!res.ok) throw new Error(res.statusText)",
+  "return structuredClone(state)",
+  "el.setAttribute('aria-live', 'polite')",
+  "const key = encodeURIComponent(raw)",
+  "await mutex.runExclusive(write)",
+  "if (signal.aborted) return",
+  "const id = crypto.randomUUID()",
+  "return lines.filter((row) => row.trim())",
+  "const url = new URL(path, origin)",
+  "queueMicrotask(() => flush())",
+  "map.set(id, Object.freeze(item))",
+  "for (const row of rows) yield transform(row)",
+  "const html = escape(text)",
+  "db.prepare('SELECT * FROM bugs WHERE id = ?').get(id)",
+  "requestAnimationFrame(tick)",
+  "const left = Math.max(0, budget - used)",
+  "headers.set('Content-Type', 'application/json')",
+  "if (bugs === 0) return rewrite(lines)",
+  "test('clamp', () => expect(clamp(-1, 0, 1)).toBe(0))",
 ];
 
 const ERR_LINES = [
@@ -45,7 +99,31 @@ const ERR_LINES = [
   "SyntaxError: Unexpected token ; ; ;",
   "RangeError: Maximum call stack size exceeded",
   "Warning: 这段代码有自己的想法",
+  "Error: ECONNRESET prod-db 被谁 rm 了",
+  "TypeError: foo is not a function, foo is foo",
+  "FATAL: git 拒绝覆盖同事的周末",
+  "Error: Cannot find module './utils/utils/utils'",
+  "Warning: setState on unmounted 情绪",
+  "SyntaxError: Unexpected end of JSON in 注释里",
+  "Error: 401 但本地 token 还活着",
+  "RangeError: Invalid array length 999999999",
+  "TypeError: Assignment to constant 临时变量",
+  "Error: timeout of 0ms exceeded",
+  "Warning: 循环依赖把自己 import 进来了",
+  "FATAL: 构建过了，人没过",
+  "Error: ENOENT /the/file/we/swore/was-there.js",
+  "Unhandled: then() 里又 then() 里又 then()",
+  "Error: CORS 把锅甩给前端",
+  "Warning: memory leak 从 2019 活到现在",
+  "SyntaxError: missing ) after 我发誓有括号",
+  "Error: 0 BUG 但 12 个 未知行为",
+  "FATAL: 这行能跑，但谁也解释不了",
+  "TypeError: null.forEach is not a vibe",
 ];
+
+function pick(pool) {
+  return pool[(Math.random() * pool.length) | 0];
+}
 
 const el = {
   app: document.getElementById("app"),
@@ -254,7 +332,7 @@ function drawScene(t, holding, rankId) {
 
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 12) state.log.shift();
+  if (state.log.length > 24) state.log.shift();
   renderLog();
 }
 
@@ -394,7 +472,7 @@ function tick(now) {
         const dropped = Math.floor(before) - Math.floor(state.bugs);
         if (dropped > 0) {
           for (let i = 0; i < dropped; i += 1) {
-            pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
+            pushLog(`fixed  ${pick(ERR_LINES)}`, "ok");
           }
         }
       }
@@ -410,7 +488,7 @@ function tick(now) {
         if (gained > 0) {
           state.lines = Math.max(0, state.lines - gained);
           for (let i = 0; i < gained; i += 1) {
-            pushLog(GOOD_LINES[Math.floor(prevG + i) % GOOD_LINES.length], "ok");
+            pushLog(pick(GOOD_LINES), "ok");
           }
         }
       }
@@ -424,11 +502,11 @@ function tick(now) {
       if (newBugs > 0) {
         state.goodLines = Math.max(0, state.goodLines - newBugs);
         for (let i = 0; i < newBugs; i += 1) {
-          pushLog(ERR_LINES[Math.floor(prevB + i) % ERR_LINES.length], "err");
+          pushLog(pick(ERR_LINES), "err");
         }
       }
       if (Math.floor(state.lines) > Math.floor(prevL)) {
-        pushLog(SLOP_LINES[Math.floor(state.lines) % SLOP_LINES.length], "dim");
+        pushLog(pick(SLOP_LINES), "dim");
       }
       state.goodLines = Math.max(0, state.goodLines);
     }
