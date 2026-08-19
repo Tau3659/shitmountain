@@ -184,52 +184,6 @@ function px(ctx, x, y, w, h, color) {
   ctx.fillRect(x | 0, y | 0, w | 0, h | 0);
 }
 
-const INK = "#0e1014";
-const SKIN = "#c4896a";
-const SKIN_D = "#7a4e38";
-const SHIRT = "#3a5a8a";
-const SHIRT_D = "#1a2c48";
-const HAIR = "#1a1210";
-const HAIR_HI = "#3a2a1c";
-const HEAD = { x: 12, y: 14, w: 44, h: 42 };
-
-function outlined(ctx, x, y, w, h, fill) {
-  px(ctx, x, y, w, h, INK);
-  if (w > 2 && h > 2) px(ctx, x + 1, y + 1, w - 2, h - 2, fill);
-}
-
-function drawFace(rankId, t) {
-  const ctx = faceCtx;
-  const blink = Math.sin(t * 2.1) > 0.92;
-  ctx.clearRect(0, 0, 32, 32);
-  px(ctx, 0, 0, 32, 32, "#12141a");
-  outlined(ctx, 4, 6, 24, 24, SKIN);
-  px(ctx, 5, 7, 8, 22, SKIN_D);
-  if (rankId === 0) {
-    outlined(ctx, 3, 2, 26, 12, HAIR);
-    px(ctx, 3, 8, 5, 10, HAIR);
-    px(ctx, 24, 8, 5, 8, HAIR);
-    px(ctx, 8, 2, 4, 4, HAIR);
-    px(ctx, 18, 1, 5, 4, HAIR);
-  } else if (rankId === 1) {
-    outlined(ctx, 4, 4, 24, 8, HAIR);
-    px(ctx, 10, 4, 12, 5, SKIN);
-  } else {
-    px(ctx, 10, 6, 12, 4, SKIN);
-    px(ctx, 12, 4, 8, 3, "#e2c4a8");
-    px(ctx, 8, 24, 16, 3, SKIN_D);
-  }
-  px(ctx, 9, 14, 5, 5, INK);
-  px(ctx, 18, 14, 5, 5, INK);
-  if (!blink) {
-    px(ctx, 10, 15, 3, 3, "#f0f4f8");
-    px(ctx, 19, 15, 3, 3, "#f0f4f8");
-    px(ctx, 11, 16, 1, 1, INK);
-    px(ctx, 20, 16, 1, 1, INK);
-  }
-  px(ctx, 14, 21, 5, 2, SKIN_D);
-}
-
 function dither(ctx, x, y, w, h, a, b) {
   px(ctx, x, y, w, h, a);
   ctx.fillStyle = b;
@@ -253,12 +207,12 @@ function layerDesk(ctx) {
 }
 
 function layerProps(ctx) {
-  px(ctx, 4, 76, 12, 8, "#d0d4d8");
-  px(ctx, 5, 74, 10, 3, "#8b9094");
-  px(ctx, 5, 78, 10, 1, "#7a7e82");
-  px(ctx, 48, 76, 8, 8, "#4a4e52");
-  px(ctx, 49, 74, 6, 3, "#3a3c40");
-  px(ctx, 50, 72, 4, 3, "#d0d4d8");
+  px(ctx, 2, 76, 10, 8, "#d0d4d8");
+  px(ctx, 3, 74, 8, 3, "#8b9094");
+  px(ctx, 3, 78, 8, 1, "#7a7e82");
+  px(ctx, 2, 68, 7, 7, "#4a4e52");
+  px(ctx, 3, 66, 5, 3, "#3a3c40");
+  px(ctx, 4, 64, 3, 3, "#d0d4d8");
 }
 
 function layerMonitor(ctx, holding, flashing) {
@@ -277,61 +231,67 @@ function layerMonitor(ctx, holding, flashing) {
   px(ctx, 133, 90, 2, 14, "#2a2c2e");
 }
 
-function layerBody(ctx, rankId) {
-  const { x, y, w, h } = HEAD;
-  outlined(ctx, 22, 52, 28, 32, SHIRT);
-  px(ctx, 23, 53, 8, 30, SHIRT_D);
-  outlined(ctx, 16, 56, 10, 22, SHIRT);
-  px(ctx, 17, 57, 3, 20, SHIRT_D);
-  outlined(ctx, x, y, w, h, SKIN);
-  px(ctx, x + 1, y + 1, 14, h - 2, SKIN_D);
-  if (rankId === 0) {
-    outlined(ctx, x - 2, y - 8, w + 4, 16, HAIR);
-    px(ctx, x - 2, y + 4, 8, 14, HAIR);
-    px(ctx, x + w - 6, y + 4, 8, 12, HAIR);
-    px(ctx, x + 6, y - 10, 6, 6, HAIR);
-    px(ctx, x + 22, y - 12, 8, 7, HAIR);
-  } else if (rankId === 1) {
-    outlined(ctx, x - 1, y - 4, w + 2, 10, HAIR);
-    px(ctx, x + 10, y - 3, 18, 6, SKIN);
-    px(ctx, x + 1, y + 1, 8, 8, HAIR);
-  } else {
-    px(ctx, x + 12, y - 2, 14, 5, "#e2c4a8");
-    px(ctx, x + 6, y + h - 8, 20, 4, SKIN_D);
-  }
-  px(ctx, x + 10, y + 16, 6, 6, INK);
-  px(ctx, x + 24, y + 16, 6, 6, INK);
-  px(ctx, x + 12, y + 18, 3, 3, "#f0f4f8");
-  px(ctx, x + 26, y + 18, 3, 3, "#f0f4f8");
-  px(ctx, x + 13, y + 19, 1, 1, INK);
-  px(ctx, x + 27, y + 19, 1, 1, INK);
-  px(ctx, x + 18, y + 26, 8, 3, SKIN_D);
-  outlined(ctx, x + 16, y + h - 2, 12, 6, SKIN);
+const gfx = {
+  head: null,
+  body: null,
+  hands: null,
+  crt: null,
+  faces: [null, null, null],
+};
+
+const SPR = {
+  head: { x: 6, y: 10 },
+  body: { x: 18, y: 46 },
+  hands: { x: 36, y: 74 },
+  crt: { x: 20, y: 12 },
+};
+
+function blit(ctx, img, x, y) {
+  if (!img) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, x | 0, y | 0);
+}
+
+function drawFace(rankId) {
+  const ctx = faceCtx;
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, 32, 32);
+  const img = gfx.faces[rankId] || gfx.faces[0];
+  if (img) ctx.drawImage(img, 0, 0, 32, 32);
+}
+
+function loadGfx() {
+  const names = ["head", "body", "hands", "crt", "face-0", "face-1", "face-2"];
+  return Promise.all(names.map((name) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve([name, img]);
+    img.onerror = () => reject(new Error(name));
+    img.src = `img/${name}.png`;
+  }))).then((pairs) => {
+    for (const [name, img] of pairs) {
+      if (name.startsWith("face-")) gfx.faces[Number(name.slice(5))] = img;
+      else gfx[name] = img;
+    }
+  });
+}
+
+function layerBody(ctx) {
+  blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
+  blit(ctx, gfx.head, SPR.head.x, SPR.head.y);
 }
 
 function layerHandsKeys(ctx, tap) {
-  outlined(ctx, 54, 80, 40, 8, "#1c1e20");
-  px(ctx, 56, 82, 6, 3, "#4a4e52");
-  px(ctx, 64, 82, 6, 3, "#4a4e52");
-  px(ctx, 72, 82, 6, 3, "#4a4e52");
-  px(ctx, 80, 82, 8, 3, "#4a4e52");
-  outlined(ctx, 48, 60, 16, 12, SHIRT);
-  outlined(ctx, 62, 72 + tap, 12, 8, SKIN);
-  px(ctx, 63, 73 + tap, 4, 6, SKIN_D);
-  outlined(ctx, 70 + tap, 78, 8, 5, SKIN);
+  blit(ctx, gfx.hands, SPR.hands.x, SPR.hands.y + tap);
 }
 
-function layerCrtLight(ctx, holding, flashing, tap) {
-  const glow = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#8ab0c0";
-  const { x, y, w, h } = HEAD;
-  px(ctx, x + 22, y + 10, 18, 24, glow);
-  px(ctx, x + 30, y + 14, 8, 16, flashing ? "#f4fafc" : glow);
-  px(ctx, x + 24, y + 16, 6, 6, INK);
-  px(ctx, x + 26, y + 18, 3, 3, "#f0f4f8");
-  px(ctx, x + 27, y + 19, 1, 1, INK);
-  px(ctx, x + 18, y + h - 1, 10, 4, glow);
-  px(ctx, 64, 74 + tap, 8, 5, glow);
-  px(ctx, 72 + tap, 79, 5, 3, glow);
+function layerCrtLight(ctx, holding, flashing) {
+  if (!gfx.crt) return;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.globalAlpha = flashing ? 1 : holding ? 0.72 : 0.32;
+  ctx.globalCompositeOperation = "screen";
+  blit(ctx, gfx.crt, SPR.crt.x, SPR.crt.y);
+  ctx.restore();
 }
 
 function drawScene(t, holding, rankId) {
@@ -349,9 +309,9 @@ function drawScene(t, holding, rankId) {
   layerDesk(ctx);
   layerProps(ctx);
   layerMonitor(ctx, holding, flashing);
-  layerBody(ctx, rankId);
+  layerBody(ctx);
   layerHandsKeys(ctx, tap);
-  layerCrtLight(ctx, holding, flashing, tap);
+  layerCrtLight(ctx, holding, flashing);
 }
 
 function pushLog(text, kind) {
@@ -541,7 +501,7 @@ function tick(now) {
     if (state.flashAge >= FLASH_DUR) state.flashAge = -1;
   }
 
-  drawFace(state.rank, state.time);
+  drawFace(state.rank);
   drawScene(state.time, state.holding && state.started && !state.paused, state.rank, state.bugs);
   renderHud();
   requestAnimationFrame(tick);
@@ -583,4 +543,7 @@ window.addEventListener("keydown", (ev) => {
 
 renderHud();
 state.last = performance.now();
-requestAnimationFrame(tick);
+loadGfx().then(() => requestAnimationFrame(tick)).catch((err) => {
+  console.error(err);
+  requestAnimationFrame(tick);
+});
