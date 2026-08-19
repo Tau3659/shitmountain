@@ -138,64 +138,79 @@ function drawScene(t, holding, rankId, bugs) {
   const H = ch / s;
 
   px(ctx, 0, 0, W, H, holding ? "#243044" : "#1a1420");
-  px(ctx, 0, H * 0.62, W, H, "#2b1c12");
-  px(ctx, 0, H * 0.62, W, 3, "#4a3222");
+  const deskY = Math.floor(H * 0.78);
+  px(ctx, 0, deskY - 8, W, H, "#2b1c12");
+  px(ctx, 0, deskY - 8, W, 3, "#4a3222");
+  px(ctx, 8, deskY, W - 16, 16, "#5a3b24");
+  px(ctx, 14, deskY + 16, 12, H - deskY, "#3a2416");
+  px(ctx, W - 26, deskY + 16, 12, H - deskY, "#3a2416");
 
-  const deskY = H * 0.7;
-  px(ctx, 12, deskY, W - 24, 14, "#5a3b24");
-  px(ctx, 18, deskY + 14, 10, H - deskY, "#3a2416");
-  px(ctx, W - 28, deskY + 14, 10, H - deskY, "#3a2416");
+  const k = Math.max(1.2, (H * 0.52) / 56);
+  const u = (n) => Math.max(2, Math.round(n * k));
+  const lean = holding ? 0 : u(3);
+  const tap = !holding && Math.floor(t * 12) % 2 ? u(1) : 0;
+  const cx = Math.floor(W * 0.30);
+  const feetY = deskY;
 
-  const monX = W * 0.54;
-  const monY = deskY - 46;
-  px(ctx, monX, monY, 58, 40, "#111");
-  px(ctx, monX + 3, monY + 3, 52, 30, holding ? "#0d2a18" : "#2a1010");
+  const monW = u(70);
+  const monH = u(48);
+  const monX = Math.floor(W * 0.52);
+  const monY = feetY - monH - u(4);
+  px(ctx, monX, monY, monW, monH, "#111");
+  px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(14), holding ? "#0d2a18" : "#2a1010");
   const flicker = holding ? 0 : (Math.sin(t * 18) > 0 ? 1 : 0);
   for (let i = 0; i < 5; i += 1) {
     const col = holding ? "#3fb950" : (flicker && i % 2 ? "#f85149" : "#e3b341");
-    px(ctx, monX + 6, monY + 6 + i * 5, 20 + (i * 7) % 26, 2, col);
+    px(ctx, monX + u(6), monY + u(6) + i * u(6), u(24) + (i * 7) % u(28), u(2), col);
   }
-  px(ctx, monX + 24, monY + 34, 10, 8, "#222");
-  px(ctx, monX + 14, deskY - 4, 30, 4, "#333");
-
+  px(ctx, monX + Math.floor(monW / 2) - u(6), monY + monH - u(10), u(12), u(8), "#222");
+  px(ctx, monX + u(16), feetY - u(4), u(36), u(4), "#333");
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
   if (flashing) {
-    px(ctx, monX + 3, monY + 3, 52, 30, "#e8fff0");
+    px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(14), "#e8fff0");
   }
 
-  const hunch = holding ? 0 : 7;
-  const tap = !holding && Math.floor(t * 10) % 2;
-  const bodyX = W * 0.28;
-  const bodyY = deskY - 8 - (holding ? 4 : 0);
-  px(ctx, bodyX - 10, bodyY - 28 + hunch, 28, 26, "#1f6feb");
-  px(ctx, bodyX - 6, bodyY - 44 + hunch, 20, 18, "#e2b48a");
+  px(ctx, cx - u(8), feetY - u(10), u(10), u(10), "#1f6feb");
+  px(ctx, cx + u(4), feetY - u(10), u(10), u(10), "#1f6feb");
+  px(ctx, cx - u(6), feetY - u(4), u(8), u(4), "#2b2118");
+  px(ctx, cx + u(6), feetY - u(4), u(8), u(4), "#2b2118");
+
+  const torsoY = feetY - u(40);
+  px(ctx, cx - u(14) + lean, torsoY, u(32), u(32), "#1f6feb");
+  if (rankId === 2) {
+    px(ctx, cx - u(16) + lean, torsoY + u(18), u(36), u(14), "#1f6feb");
+  }
+  const headY = torsoY - u(22);
+  px(ctx, cx - u(10) + lean, headY, u(24), u(22), "#e2b48a");
   if (rankId === 0) {
-    px(ctx, bodyX - 8, bodyY - 50 + hunch, 24, 10, "#2b2118");
+    px(ctx, cx - u(12) + lean, headY - u(8), u(28), u(12), "#2b2118");
+    px(ctx, cx - u(14) + lean, headY + u(2), u(8), u(16), "#2b2118");
+    px(ctx, cx + u(14) + lean, headY + u(2), u(8), u(16), "#2b2118");
   } else if (rankId === 1) {
-    px(ctx, bodyX - 8, bodyY - 48 + hunch, 24, 6, "#3a2a1c");
-    px(ctx, bodyX - 2, bodyY - 50 + hunch, 12, 4, "#e2b48a");
+    px(ctx, cx - u(12) + lean, headY - u(4), u(28), u(8), "#3a2a1c");
+    px(ctx, cx - u(4) + lean, headY - u(6), u(14), u(6), "#e2b48a");
   } else {
-    px(ctx, bodyX - 2, bodyY - 48 + hunch, 12, 4, "#f0d2b0");
-    px(ctx, bodyX - 10, bodyY - 18 + hunch, 28, 10, "#1f6feb");
+    px(ctx, cx - u(4) + lean, headY - u(4), u(14), u(5), "#f0d2b0");
   }
-  px(ctx, bodyX - 16, bodyY - 12 + hunch, 12, 6, "#e2b48a");
-  px(ctx, bodyX + 12, bodyY - 8 + hunch + tap, 16, 5, "#e2b48a");
-  px(ctx, bodyX + 24, deskY - 2, 10, 3, "#c9d1d9");
-
+  px(ctx, cx - u(4) + lean, headY + u(10), u(6), u(4), "#3d2918");
+  px(ctx, cx + u(6) + lean, headY + u(10), u(6), u(4), "#3d2918");
   if (holding && bugs <= 0) {
-    px(ctx, bodyX - 2, bodyY - 36 + hunch, 6, 2, "#3d2918");
-    px(ctx, bodyX + 8, bodyY - 36 + hunch, 6, 2, "#3d2918");
+    px(ctx, cx - u(4) + lean, headY + u(11), u(6), u(2), "#e2b48a");
+    px(ctx, cx + u(6) + lean, headY + u(11), u(6), u(2), "#e2b48a");
   }
+  px(ctx, cx - u(20) + lean, torsoY + u(8), u(12), u(7), "#e2b48a");
+  px(ctx, cx + u(16) + lean, torsoY + u(10) + tap, u(18), u(6), "#e2b48a");
+  px(ctx, cx + u(30) + lean, feetY - u(3), u(12), u(3), "#c9d1d9");
 
   if (!holding) {
-    px(ctx, monX + 40, monY - 8, 3, 3, "#f85149");
-    px(ctx, monX + 48, monY - 4, 2, 2, "#e3b341");
+    px(ctx, monX + monW - u(10), monY - u(8), u(4), u(4), "#f85149");
+    px(ctx, monX + monW - u(4), monY - u(4), u(3), u(3), "#e3b341");
   }
 }
 
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 4) state.log.shift();
+  if (state.log.length > 12) state.log.shift();
   renderLog();
 }
 
@@ -356,6 +371,7 @@ function onDown(ev) {
   if (isClockOutTarget(ev.target)) return;
   if (el.sheet.contains(ev.target)) return;
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
+  ev.preventDefault();
   if (!state.started) startGame();
   poke();
 }
