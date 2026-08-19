@@ -184,34 +184,50 @@ function px(ctx, x, y, w, h, color) {
   ctx.fillRect(x | 0, y | 0, w | 0, h | 0);
 }
 
+const INK = "#0e1014";
+const SKIN = "#c4896a";
+const SKIN_D = "#7a4e38";
+const SHIRT = "#3a5a8a";
+const SHIRT_D = "#1a2c48";
+const HAIR = "#1a1210";
+const HAIR_HI = "#3a2a1c";
+const HEAD = { x: 12, y: 14, w: 44, h: 42 };
+
+function outlined(ctx, x, y, w, h, fill) {
+  px(ctx, x, y, w, h, INK);
+  if (w > 2 && h > 2) px(ctx, x + 1, y + 1, w - 2, h - 2, fill);
+}
+
 function drawFace(rankId, t) {
   const ctx = faceCtx;
   const blink = Math.sin(t * 2.1) > 0.92;
   ctx.clearRect(0, 0, 32, 32);
   px(ctx, 0, 0, 32, 32, "#12141a");
-  px(ctx, 6, 10, 20, 18, "#8a6248");
-  px(ctx, 14, 10, 12, 18, "#c8dce8");
-  px(ctx, 10, 16, 3, 3, "#1a1410");
-  px(ctx, 19, 16, 3, 3, "#1a1410");
-  if (blink) {
-    px(ctx, 10, 17, 3, 1, "#8a6248");
-    px(ctx, 19, 17, 3, 1, "#c8dce8");
-  }
-  px(ctx, 14, 21, 5, 2, "#6a5344");
+  outlined(ctx, 4, 6, 24, 24, SKIN);
+  px(ctx, 5, 7, 8, 22, SKIN_D);
   if (rankId === 0) {
-    px(ctx, 6, 4, 20, 8, "#1a1410");
-    px(ctx, 4, 10, 5, 10, "#1a1410");
-    px(ctx, 23, 10, 5, 8, "#1a1410");
+    outlined(ctx, 3, 2, 26, 12, HAIR);
+    px(ctx, 3, 8, 5, 10, HAIR);
+    px(ctx, 24, 8, 5, 8, HAIR);
+    px(ctx, 8, 2, 4, 4, HAIR);
+    px(ctx, 18, 1, 5, 4, HAIR);
   } else if (rankId === 1) {
-    px(ctx, 6, 7, 20, 5, "#2a2018");
-    px(ctx, 4, 10, 4, 6, "#2a2018");
-    px(ctx, 24, 10, 4, 6, "#2a2018");
-    px(ctx, 12, 6, 10, 4, "#c8dce8");
+    outlined(ctx, 4, 4, 24, 8, HAIR);
+    px(ctx, 10, 4, 12, 5, SKIN);
   } else {
-    px(ctx, 8, 8, 16, 4, "#c8dce8");
-    px(ctx, 14, 6, 8, 3, "#d8e8ee");
-    px(ctx, 10, 24, 12, 3, "#8a6248");
+    px(ctx, 10, 6, 12, 4, SKIN);
+    px(ctx, 12, 4, 8, 3, "#e2c4a8");
+    px(ctx, 8, 24, 16, 3, SKIN_D);
   }
+  px(ctx, 9, 14, 5, 5, INK);
+  px(ctx, 18, 14, 5, 5, INK);
+  if (!blink) {
+    px(ctx, 10, 15, 3, 3, "#f0f4f8");
+    px(ctx, 19, 15, 3, 3, "#f0f4f8");
+    px(ctx, 11, 16, 1, 1, INK);
+    px(ctx, 20, 16, 1, 1, INK);
+  }
+  px(ctx, 14, 21, 5, 2, SKIN_D);
 }
 
 function dither(ctx, x, y, w, h, a, b) {
@@ -224,8 +240,6 @@ function dither(ctx, x, y, w, h, a, b) {
     }
   }
 }
-
-const HEAD = { x: 28, y: 20 };
 
 function layerWall(ctx) {
   dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
@@ -264,50 +278,60 @@ function layerMonitor(ctx, holding, flashing) {
 }
 
 function layerBody(ctx, rankId) {
-  const shirt = "#2a3c54";
-  const skin = "#8a6248";
-  px(ctx, 20, 52, 42, 32, shirt);
-  px(ctx, 22, 54, 10, 22, "#1e2c40");
-  px(ctx, 36, 48, 10, 6, skin);
-  const { x: headX, y: headY } = HEAD;
-  px(ctx, headX, headY, 26, 30, skin);
+  const { x, y, w, h } = HEAD;
+  outlined(ctx, 22, 52, 28, 32, SHIRT);
+  px(ctx, 23, 53, 8, 30, SHIRT_D);
+  outlined(ctx, 16, 56, 10, 22, SHIRT);
+  px(ctx, 17, 57, 3, 20, SHIRT_D);
+  outlined(ctx, x, y, w, h, SKIN);
+  px(ctx, x + 1, y + 1, 14, h - 2, SKIN_D);
   if (rankId === 0) {
-    px(ctx, headX - 2, headY - 6, 30, 10, "#1a1410");
-    px(ctx, headX - 4, headY + 2, 8, 14, "#1a1410");
-    px(ctx, headX + 22, headY + 2, 8, 10, "#1a1410");
+    outlined(ctx, x - 2, y - 8, w + 4, 16, HAIR);
+    px(ctx, x - 2, y + 4, 8, 14, HAIR);
+    px(ctx, x + w - 6, y + 4, 8, 12, HAIR);
+    px(ctx, x + 6, y - 10, 6, 6, HAIR);
+    px(ctx, x + 22, y - 12, 8, 7, HAIR);
   } else if (rankId === 1) {
-    px(ctx, headX - 2, headY - 2, 30, 7, "#2a2018");
-    px(ctx, headX + 8, headY - 4, 14, 5, skin);
+    outlined(ctx, x - 1, y - 4, w + 2, 10, HAIR);
+    px(ctx, x + 10, y - 3, 18, 6, SKIN);
+    px(ctx, x + 1, y + 1, 8, 8, HAIR);
   } else {
-    px(ctx, headX + 10, headY - 2, 12, 4, "#c9a07a");
-    px(ctx, headX + 2, headY + 22, 20, 3, skin);
+    px(ctx, x + 12, y - 2, 14, 5, "#e2c4a8");
+    px(ctx, x + 6, y + h - 8, 20, 4, SKIN_D);
   }
-  px(ctx, headX + 6, headY + 12, 3, 3, "#1a1410");
-  px(ctx, headX + 16, headY + 12, 3, 3, "#1a1410");
-  px(ctx, headX + 18, headY + 16, 3, 4, "#a07060");
-  px(ctx, 14, 58, 10, 18, shirt);
+  px(ctx, x + 10, y + 16, 6, 6, INK);
+  px(ctx, x + 24, y + 16, 6, 6, INK);
+  px(ctx, x + 12, y + 18, 3, 3, "#f0f4f8");
+  px(ctx, x + 26, y + 18, 3, 3, "#f0f4f8");
+  px(ctx, x + 13, y + 19, 1, 1, INK);
+  px(ctx, x + 27, y + 19, 1, 1, INK);
+  px(ctx, x + 18, y + 26, 8, 3, SKIN_D);
+  outlined(ctx, x + 16, y + h - 2, 12, 6, SKIN);
 }
 
 function layerHandsKeys(ctx, tap) {
-  const skin = "#8a6248";
-  px(ctx, 56, 82, 38, 5, "#1c1e20");
-  px(ctx, 58, 83, 6, 2, "#3a3c40");
-  px(ctx, 66, 83, 6, 2, "#3a3c40");
-  px(ctx, 74, 83, 6, 2, "#3a3c40");
-  px(ctx, 82, 83, 8, 2, "#3a3c40");
-  px(ctx, 54, 62, 16, 8, "#2a3c54");
-  px(ctx, 66, 76 + tap, 10, 5, skin);
-  px(ctx, 72 + tap, 80, 6, 3, skin);
+  outlined(ctx, 54, 80, 40, 8, "#1c1e20");
+  px(ctx, 56, 82, 6, 3, "#4a4e52");
+  px(ctx, 64, 82, 6, 3, "#4a4e52");
+  px(ctx, 72, 82, 6, 3, "#4a4e52");
+  px(ctx, 80, 82, 8, 3, "#4a4e52");
+  outlined(ctx, 48, 60, 16, 12, SHIRT);
+  outlined(ctx, 62, 72 + tap, 12, 8, SKIN);
+  px(ctx, 63, 73 + tap, 4, 6, SKIN_D);
+  outlined(ctx, 70 + tap, 78, 8, 5, SKIN);
 }
 
 function layerCrtLight(ctx, holding, flashing, tap) {
-  const glow = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#7aa0b0";
-  const { x: headX, y: headY } = HEAD;
-  px(ctx, headX + 12, headY + 6, 12, 18, glow);
-  px(ctx, headX + 20, headY + 10, 5, 12, flashing ? "#f4fafc" : glow);
-  px(ctx, 36, 48, 10, 6, glow);
-  px(ctx, 66, 76 + tap, 10, 5, glow);
-  px(ctx, 72 + tap, 80, 6, 3, glow);
+  const glow = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#8ab0c0";
+  const { x, y, w, h } = HEAD;
+  px(ctx, x + 22, y + 10, 18, 24, glow);
+  px(ctx, x + 30, y + 14, 8, 16, flashing ? "#f4fafc" : glow);
+  px(ctx, x + 24, y + 16, 6, 6, INK);
+  px(ctx, x + 26, y + 18, 3, 3, "#f0f4f8");
+  px(ctx, x + 27, y + 19, 1, 1, INK);
+  px(ctx, x + 18, y + h - 1, 10, 4, glow);
+  px(ctx, 64, 74 + tap, 8, 5, glow);
+  px(ctx, 72 + tap, 79, 5, 3, glow);
 }
 
 function drawScene(t, holding, rankId) {
