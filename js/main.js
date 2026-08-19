@@ -54,6 +54,7 @@ const el = {
   status: document.getElementById("status"),
   clockOut: document.getElementById("clock-out"),
   lines: document.getElementById("lines"),
+  good: document.getElementById("good"),
   bugs: document.getElementById("bugs"),
   bugsWrap: document.getElementById("bugs-wrap"),
   scene: document.getElementById("scene"),
@@ -242,6 +243,7 @@ function renderHud() {
   const lines = Math.floor(state.lines);
   const bugs = Math.floor(state.bugs);
   el.lines.textContent = String(lines);
+  el.good.textContent = String(Math.floor(state.goodLines));
   el.bugs.textContent = String(bugs);
   el.bugsWrap.classList.toggle("hot", bugs > 0);
   if (bugs > 0 && bugs !== state.lastBugShown) hopBugMeter();

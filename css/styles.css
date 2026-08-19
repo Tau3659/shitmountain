@@ -113,8 +113,26 @@ html, body {
   overflow: visible;
 }
 
+.meter-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .meter-lines {
   color: var(--muted);
+}
+
+.meter-good {
+  color: var(--ok);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.meter-good #good {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
 .meter-bugs {
