@@ -62,6 +62,7 @@ faceCtx.imageSmoothingEnabled = false;
 sceneCtx.imageSmoothingEnabled = false;
 
 const TAP_FOCUS = 0.6;
+const JUMP_DUR = 0.16;
 
 const state = {
   started: false,
@@ -74,6 +75,8 @@ const state = {
   time: 0,
   last: 0,
   focusUntil: 0,
+  jumpsLeft: 0,
+  jumpAge: -1,
 };
 
 function rank() {
@@ -155,8 +158,10 @@ function drawScene(t, holding, rankId, bugs) {
 
   const hunch = holding ? 0 : 7;
   const tap = !holding && Math.floor(t * 10) % 2;
+  const u = state.jumpAge >= 0 ? Math.min(1, state.jumpAge / JUMP_DUR) : 0;
+  const hop = state.jumpAge >= 0 ? Math.sin(u * Math.PI) * 12 : 0;
   const bodyX = W * 0.28;
-  const bodyY = deskY - 8 - (holding ? 4 : 0);
+  const bodyY = deskY - 8 - (holding ? 4 : 0) - hop;
   px(ctx, bodyX - 10, bodyY - 28 + hunch, 28, 26, "#1f6feb");
   px(ctx, bodyX - 6, bodyY - 44 + hunch, 20, 18, "#e2b48a");
   if (rankId === 0) {
@@ -274,6 +279,8 @@ function resetRun() {
   state.bugs = 0;
   state.log = [];
   state.focusUntil = 0;
+  state.jumpsLeft = 0;
+  state.jumpAge = -1;
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
   renderLog();
@@ -291,8 +298,13 @@ function tick(now) {
     if (state.holding) {
       const before = state.bugs;
       state.bugs = Math.max(0, state.bugs - r.fixPerSec * dt);
-      if (Math.floor(before) > Math.floor(state.bugs)) {
-        pushLog(`fixed  ${ERR_LINES[Math.floor(before) % ERR_LINES.length]}`, "ok");
+      const dropped = Math.floor(before) - Math.floor(state.bugs);
+      if (dropped > 0) {
+        for (let i = 0; i < dropped; i += 1) {
+          pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
+        }
+        state.jumpsLeft += dropped;
+        if (state.jumpAge < 0) state.jumpAge = 0;
       }
     } else {
       const prevL = state.lines;
@@ -306,6 +318,14 @@ function tick(now) {
       if (Math.floor(state.bugs) > Math.floor(prevB)) {
         pushLog(ERR_LINES[Math.floor(state.bugs) % ERR_LINES.length], "err");
       }
+    }
+  }
+
+  if (state.jumpAge >= 0) {
+    state.jumpAge += dt;
+    if (state.jumpAge >= JUMP_DUR) {
+      state.jumpsLeft = Math.max(0, state.jumpsLeft - 1);
+      state.jumpAge = state.jumpsLeft > 0 ? 0 : -1;
     }
   }
 
