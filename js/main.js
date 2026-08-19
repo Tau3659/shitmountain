@@ -61,6 +61,8 @@ const sceneCtx = el.scene.getContext("2d");
 faceCtx.imageSmoothingEnabled = false;
 sceneCtx.imageSmoothingEnabled = false;
 
+const TAP_FOCUS = 0.6;
+
 const state = {
   started: false,
   holding: false,
@@ -71,6 +73,7 @@ const state = {
   log: [],
   time: 0,
   last: 0,
+  focusUntil: 0,
 };
 
 function rank() {
@@ -209,9 +212,10 @@ function renderHud() {
   document.body.classList.toggle("is-slop", !fixing);
 }
 
-function setHolding(on) {
+function poke() {
   if (state.paused || !state.started) return;
-  state.holding = !!on;
+  state.focusUntil = state.time + TAP_FOCUS;
+  state.holding = true;
   renderHud();
 }
 
@@ -225,6 +229,7 @@ function startGame() {
 function openSheet(finalQuit) {
   state.paused = true;
   state.holding = false;
+  state.focusUntil = 0;
   const lines = Math.floor(state.lines);
   const bugs = Math.floor(state.bugs);
   el.sumLines.textContent = String(lines);
@@ -268,6 +273,7 @@ function resetRun() {
   state.lines = 0;
   state.bugs = 0;
   state.log = [];
+  state.focusUntil = 0;
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
   renderLog();
@@ -281,6 +287,7 @@ function tick(now) {
   const r = rank();
 
   if (state.started && !state.paused) {
+    state.holding = state.time < state.focusUntil;
     if (state.holding) {
       const before = state.bugs;
       state.bugs = Math.max(0, state.bugs - r.fixPerSec * dt);
@@ -315,21 +322,13 @@ function isClockOutTarget(target) {
 function onDown(ev) {
   if (isClockOutTarget(ev.target)) return;
   if (el.sheet.contains(ev.target)) return;
-  if (!state.started) startGame();
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
-  setHolding(true);
-}
-
-function onUp(ev) {
-  if (isClockOutTarget(ev.target)) return;
-  setHolding(false);
+  if (!state.started) startGame();
+  poke();
 }
 
 el.app.addEventListener("pointerdown", onDown);
 el.intro.addEventListener("pointerdown", onDown);
-window.addEventListener("pointerup", onUp);
-window.addEventListener("pointercancel", onUp);
-window.addEventListener("blur", () => setHolding(false));
 
 el.clockOut.addEventListener("pointerdown", (ev) => {
   ev.preventDefault();
@@ -346,12 +345,7 @@ window.addEventListener("keydown", (ev) => {
   if (ev.code !== "Space" || ev.repeat) return;
   ev.preventDefault();
   if (!state.started) startGame();
-  setHolding(true);
-});
-window.addEventListener("keyup", (ev) => {
-  if (ev.code !== "Space") return;
-  ev.preventDefault();
-  setHolding(false);
+  poke();
 });
 
 renderHud();
