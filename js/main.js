@@ -57,6 +57,7 @@ const el = {
   good: document.getElementById("good"),
   bugs: document.getElementById("bugs"),
   bugsWrap: document.getElementById("bugs-wrap"),
+  goodWrap: document.getElementById("good-wrap"),
   scene: document.getElementById("scene"),
   cons: document.getElementById("console"),
   intro: document.getElementById("intro"),
@@ -93,6 +94,7 @@ const state = {
   focusUntil: 0,
   flashAge: -1,
   lastBugShown: 0,
+  lastGoodShown: 0,
 };
 
 function rank() {
@@ -238,17 +240,27 @@ function hopBugMeter() {
   node.classList.add("hop");
 }
 
+function hurtGoodMeter() {
+  const node = el.goodWrap;
+  node.classList.remove("hurt");
+  void node.offsetWidth;
+  node.classList.add("hurt");
+}
+
 function renderHud() {
   const r = rank();
   el.rank.textContent = r.name;
   const lines = Math.floor(state.lines);
   const bugs = Math.floor(state.bugs);
   el.lines.textContent = String(lines);
-  el.good.textContent = String(Math.floor(state.goodLines));
+  const goods = Math.floor(state.goodLines);
+  el.good.textContent = String(goods);
   el.bugs.textContent = String(bugs);
   el.bugsWrap.classList.toggle("hot", bugs > 0);
   if (bugs > 0 && bugs !== state.lastBugShown) hopBugMeter();
   state.lastBugShown = bugs;
+  if (goods < state.lastGoodShown) hurtGoodMeter();
+  state.lastGoodShown = goods;
   const fixing = state.holding;
   const clean = fixing && Math.floor(state.bugs) <= 0;
   el.status.textContent = !fixing ? "写屎山" : clean ? "写对的" : "改 Bug";
@@ -328,6 +340,7 @@ function resetRun() {
   state.focusUntil = 0;
   state.flashAge = -1;
   state.lastBugShown = 0;
+  state.lastGoodShown = 0;
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
   renderLog();

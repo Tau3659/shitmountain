@@ -139,6 +139,13 @@ html, body {
 
 .meter-good {
   color: var(--ok);
+  transform: translateY(0);
+  will-change: transform;
+}
+
+.meter-good.hurt {
+  color: var(--bad);
+  animation: meter-hop 0.12s ease-out;
 }
 
 .meter-bugs {
