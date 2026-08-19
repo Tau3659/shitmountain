@@ -353,25 +353,39 @@ function tick(now) {
           }
         }
       }
-      if (state.bugs <= 0) {
+      if (state.bugs <= 0 && state.lines >= 1) {
         const prevG = state.goodLines;
+        const maxConvert = Math.floor(state.lines);
         state.goodLines += r.linesPerSec * dt;
-        if (Math.floor(state.goodLines) > Math.floor(prevG)) {
-          pushLog(GOOD_LINES[Math.floor(state.goodLines) % GOOD_LINES.length], "ok");
+        let gained = Math.floor(state.goodLines) - Math.floor(prevG);
+        if (gained > maxConvert) {
+          state.goodLines = Math.floor(prevG) + maxConvert;
+          gained = maxConvert;
+        }
+        if (gained > 0) {
+          state.lines = Math.max(0, state.lines - gained);
+          for (let i = 0; i < gained; i += 1) {
+            pushLog(GOOD_LINES[Math.floor(prevG + i) % GOOD_LINES.length], "ok");
+          }
         }
       }
     } else {
       const prevL = state.lines;
       const prevB = state.bugs;
+      const prevG = state.goodLines;
       state.lines += r.linesPerSec * dt;
       state.bugs += r.bugsPerSec * dt;
+      const newBugs = Math.floor(state.bugs) - Math.floor(prevB);
+      if (newBugs > 0) {
+        state.goodLines = Math.max(0, state.goodLines - newBugs);
+        for (let i = 0; i < newBugs; i += 1) {
+          pushLog(ERR_LINES[Math.floor(prevB + i) % ERR_LINES.length], "err");
+        }
+      }
       if (Math.floor(state.lines) > Math.floor(prevL)) {
-        const line = SLOP_LINES[Math.floor(state.lines) % SLOP_LINES.length];
-        pushLog(line, "dim");
+        pushLog(SLOP_LINES[Math.floor(state.lines) % SLOP_LINES.length], "dim");
       }
-      if (Math.floor(state.bugs) > Math.floor(prevB)) {
-        pushLog(ERR_LINES[Math.floor(state.bugs) % ERR_LINES.length], "err");
-      }
+      state.goodLines = Math.max(0, state.goodLines);
     }
   }
 
