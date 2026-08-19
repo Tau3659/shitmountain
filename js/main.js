@@ -54,6 +54,8 @@ const el = {
   sumBugs: document.getElementById("sum-bugs"),
   stamp: document.getElementById("clear-stamp"),
   actions: document.getElementById("sheet-actions"),
+  sumRank: document.getElementById("sum-rank"),
+  sumNext: document.getElementById("sum-next"),
 };
 
 const faceCtx = el.face.getContext("2d");
@@ -62,7 +64,7 @@ faceCtx.imageSmoothingEnabled = false;
 sceneCtx.imageSmoothingEnabled = false;
 
 const TAP_FOCUS = 0.6;
-const JUMP_DUR = 0.12;
+const FLASH_DUR = 0.09;
 
 const state = {
   started: false,
@@ -75,7 +77,8 @@ const state = {
   time: 0,
   last: 0,
   focusUntil: 0,
-  jumpAge: -1,
+  flashAge: -1,
+  lastBugShown: 0,
 };
 
 function rank() {
@@ -155,12 +158,15 @@ function drawScene(t, holding, rankId, bugs) {
   px(ctx, monX + 24, monY + 34, 10, 8, "#222");
   px(ctx, monX + 14, deskY - 4, 30, 4, "#333");
 
+  const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
+  if (flashing) {
+    px(ctx, monX + 3, monY + 3, 52, 30, "#e8fff0");
+  }
+
   const hunch = holding ? 0 : 7;
   const tap = !holding && Math.floor(t * 10) % 2;
-  const u = state.jumpAge >= 0 ? Math.min(1, state.jumpAge / JUMP_DUR) : 0;
-  const hop = state.jumpAge >= 0 ? Math.sin(u * Math.PI) * 12 : 0;
   const bodyX = W * 0.28;
-  const bodyY = deskY - 8 - (holding ? 4 : 0) - hop;
+  const bodyY = deskY - 8 - (holding ? 4 : 0);
   px(ctx, bodyX - 10, bodyY - 28 + hunch, 28, 26, "#1f6feb");
   px(ctx, bodyX - 6, bodyY - 44 + hunch, 20, 18, "#e2b48a");
   if (rankId === 0) {
@@ -189,7 +195,7 @@ function drawScene(t, holding, rankId, bugs) {
 
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 18) state.log.shift();
+  if (state.log.length > 4) state.log.shift();
   renderLog();
 }
 
@@ -200,6 +206,13 @@ function renderLog() {
   el.cons.scrollTop = el.cons.scrollHeight;
 }
 
+function hopBugMeter() {
+  const node = el.bugsWrap;
+  node.classList.remove("hop");
+  void node.offsetWidth;
+  node.classList.add("hop");
+}
+
 function renderHud() {
   const r = rank();
   el.rank.textContent = r.name;
@@ -208,6 +221,8 @@ function renderHud() {
   el.lines.textContent = String(lines);
   el.bugs.textContent = String(bugs);
   el.bugsWrap.classList.toggle("hot", bugs > 0);
+  if (bugs > 0 && bugs !== state.lastBugShown) hopBugMeter();
+  state.lastBugShown = bugs;
   const fixing = state.holding;
   el.status.textContent = fixing ? "改 Bug" : "写屎山";
   el.status.classList.toggle("fixing", fixing);
@@ -220,6 +235,7 @@ function poke() {
   if (state.paused || !state.started) return;
   state.focusUntil = state.time + TAP_FOCUS;
   state.holding = true;
+  state.flashAge = 0;
   renderHud();
 }
 
@@ -238,6 +254,9 @@ function openSheet(finalQuit) {
   const bugs = Math.floor(state.bugs);
   el.sumLines.textContent = String(lines);
   el.sumBugs.textContent = String(bugs);
+  el.sumRank.textContent = rank().name;
+  const nxt = RANKS[state.rank + 1];
+  el.sumNext.textContent = nxt ? nxt.name : "满级";
   el.stamp.classList.toggle("hidden", bugs !== 0);
   el.sheetTitle.textContent = finalQuit ? "下班" : "收工";
   el.actions.innerHTML = "";
@@ -278,7 +297,8 @@ function resetRun() {
   state.bugs = 0;
   state.log = [];
   state.focusUntil = 0;
-  state.jumpAge = -1;
+  state.flashAge = -1;
+  state.lastBugShown = 0;
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
   renderLog();
@@ -301,7 +321,6 @@ function tick(now) {
         for (let i = 0; i < dropped; i += 1) {
           pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
         }
-        state.jumpAge = 0;
       }
     } else {
       const prevL = state.lines;
@@ -318,9 +337,9 @@ function tick(now) {
     }
   }
 
-  if (state.jumpAge >= 0) {
-    state.jumpAge += dt;
-    if (state.jumpAge >= JUMP_DUR) state.jumpAge = -1;
+  if (state.flashAge >= 0) {
+    state.flashAge += dt;
+    if (state.flashAge >= FLASH_DUR) state.flashAge = -1;
   }
 
   drawFace(state.rank, state.time);

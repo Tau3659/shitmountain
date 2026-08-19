@@ -15,14 +15,16 @@
         <canvas id="face" width="48" height="48" aria-hidden="true"></canvas>
         <div class="rank-name" id="rank-name">初级</div>
       </div>
-      <div class="status" id="status">写屎山</div>
       <button type="button" id="clock-out" class="clock-out">收工</button>
     </header>
     <div class="meters">
       <div class="meter meter-lines">屎山 <span id="lines">0</span> 行</div>
       <div class="meter meter-bugs" id="bugs-wrap">Bug <span id="bugs">0</span></div>
     </div>
-    <canvas id="scene" width="320" height="220" aria-hidden="true"></canvas>
+    <div class="stage">
+      <canvas id="scene" width="320" height="280" aria-hidden="true"></canvas>
+      <div class="status" id="status">写屎山</div>
+    </div>
     <div id="console" class="console" aria-hidden="true"></div>
   </div>
 
@@ -34,6 +36,8 @@
     <div class="sheet-card">
       <h2 id="sheet-title">收工</h2>
       <ul class="scoreboard">
+        <li><span>职称</span><strong id="sum-rank">初级</strong></li>
+        <li><span>下一级</span><strong id="sum-next">中级</strong></li>
         <li><span>屎山行数</span><strong id="sum-lines">0</strong></li>
         <li><span>Bug</span><strong id="sum-bugs">0</strong></li>
       </ul>
