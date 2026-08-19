@@ -147,6 +147,91 @@ function dither(ctx, x, y, w, h, a, b) {
   }
 }
 
+const HEAD = { x: 28, y: 20 };
+
+function layerWall(ctx) {
+  dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
+}
+
+function layerDesk(ctx) {
+  px(ctx, 0, 84, 160, 36, "#2a2624");
+  px(ctx, 0, 84, 160, 6, "#3c3834");
+  px(ctx, 0, 84, 160, 1, "#4a4640");
+  px(ctx, 0, 90, 160, 1, "#1a1816");
+}
+
+function layerProps(ctx) {
+  px(ctx, 4, 76, 12, 8, "#d0d4d8");
+  px(ctx, 5, 74, 10, 3, "#8b9094");
+  px(ctx, 5, 78, 10, 1, "#7a7e82");
+  px(ctx, 48, 76, 8, 8, "#4a4e52");
+  px(ctx, 49, 74, 6, 3, "#3a3c40");
+  px(ctx, 50, 72, 4, 3, "#d0d4d8");
+}
+
+function layerMonitor(ctx, holding, flashing) {
+  const leak = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#5a7a88";
+  px(ctx, 94, 38, 4, 36, leak);
+  if (flashing) px(ctx, 92, 42, 3, 26, "#c8e4f0");
+  px(ctx, 98, 30, 50, 54, "#6a6e68");
+  px(ctx, 100, 32, 46, 48, "#3a3c3a");
+  px(ctx, 104, 36, 38, 8, "#2a2c2a");
+  px(ctx, 108, 48, 30, 2, "#4a4c4a");
+  px(ctx, 108, 52, 30, 2, "#4a4c4a");
+  px(ctx, 108, 56, 30, 2, "#4a4c4a");
+  px(ctx, 116, 78, 16, 8, "#4a4c48");
+  px(ctx, 112, 84, 24, 4, "#3a3c38");
+  px(ctx, 128, 88, 2, 12, "#2a2c2e");
+  px(ctx, 133, 90, 2, 14, "#2a2c2e");
+}
+
+function layerBody(ctx, rankId) {
+  const shirt = "#2a3c54";
+  const skin = "#8a6248";
+  px(ctx, 20, 52, 42, 32, shirt);
+  px(ctx, 22, 54, 10, 22, "#1e2c40");
+  px(ctx, 36, 48, 10, 6, skin);
+  const { x: headX, y: headY } = HEAD;
+  px(ctx, headX, headY, 26, 30, skin);
+  if (rankId === 0) {
+    px(ctx, headX - 2, headY - 6, 30, 10, "#1a1410");
+    px(ctx, headX - 4, headY + 2, 8, 14, "#1a1410");
+    px(ctx, headX + 22, headY + 2, 8, 10, "#1a1410");
+  } else if (rankId === 1) {
+    px(ctx, headX - 2, headY - 2, 30, 7, "#2a2018");
+    px(ctx, headX + 8, headY - 4, 14, 5, skin);
+  } else {
+    px(ctx, headX + 10, headY - 2, 12, 4, "#c9a07a");
+    px(ctx, headX + 2, headY + 22, 20, 3, skin);
+  }
+  px(ctx, headX + 6, headY + 12, 3, 3, "#1a1410");
+  px(ctx, headX + 16, headY + 12, 3, 3, "#1a1410");
+  px(ctx, headX + 18, headY + 16, 3, 4, "#a07060");
+  px(ctx, 14, 58, 10, 18, shirt);
+}
+
+function layerHandsKeys(ctx, tap) {
+  const skin = "#8a6248";
+  px(ctx, 56, 82, 38, 5, "#1c1e20");
+  px(ctx, 58, 83, 6, 2, "#3a3c40");
+  px(ctx, 66, 83, 6, 2, "#3a3c40");
+  px(ctx, 74, 83, 6, 2, "#3a3c40");
+  px(ctx, 82, 83, 8, 2, "#3a3c40");
+  px(ctx, 54, 62, 16, 8, "#2a3c54");
+  px(ctx, 66, 76 + tap, 10, 5, skin);
+  px(ctx, 72 + tap, 80, 6, 3, skin);
+}
+
+function layerCrtLight(ctx, holding, flashing, tap) {
+  const glow = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#7aa0b0";
+  const { x: headX, y: headY } = HEAD;
+  px(ctx, headX + 12, headY + 6, 12, 18, glow);
+  px(ctx, headX + 20, headY + 10, 5, 12, flashing ? "#f4fafc" : glow);
+  px(ctx, 36, 48, 10, 6, glow);
+  px(ctx, 66, 76 + tap, 10, 5, glow);
+  px(ctx, 72 + tap, 80, 6, 3, glow);
+}
+
 function drawScene(t, holding, rankId) {
   const canvas = el.scene;
   const ctx = sceneCtx;
@@ -158,63 +243,13 @@ function drawScene(t, holding, rankId) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
   const tap = Math.floor(t * 10) % 2;
-
-  dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
-  px(ctx, 0, 84, 160, 36, "#2a2624");
-  px(ctx, 0, 84, 160, 6, "#3c3834");
-  px(ctx, 0, 84, 160, 1, "#4a4640");
-  px(ctx, 0, 90, 160, 1, "#1a1816");
-
-  const leak = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#5a7a88";
-  px(ctx, 94, 38, 4, 36, leak);
-  if (flashing) px(ctx, 92, 42, 3, 26, "#c8e4f0");
-
-  px(ctx, 98, 30, 50, 54, "#6a6e68");
-  px(ctx, 100, 32, 46, 48, "#3a3c3a");
-  px(ctx, 104, 36, 38, 8, "#2a2c2a");
-  px(ctx, 108, 48, 30, 2, "#4a4c4a");
-  px(ctx, 108, 52, 30, 2, "#4a4c4a");
-  px(ctx, 108, 56, 30, 2, "#4a4c4a");
-  px(ctx, 116, 78, 16, 8, "#4a4c48");
-  px(ctx, 112, 84, 24, 4, "#3a3c38");
-  px(ctx, 128, 88, 2, 12, "#2a2c2e");
-  px(ctx, 133, 90, 2, 14, "#2a2c2e");
-
-  px(ctx, 56, 82, 38, 5, "#1c1e20");
-  px(ctx, 58, 83, 6, 2, "#3a3c40");
-  px(ctx, 66, 83, 6, 2, "#3a3c40");
-  px(ctx, 74, 83, 6, 2, "#3a3c40");
-  px(ctx, 82, 83, 8, 2, "#3a3c40");
-
-  const shirt = "#2a3c54";
-  px(ctx, 20, 52, 42, 32, shirt);
-  px(ctx, 22, 54, 10, 22, "#1e2c40");
-  px(ctx, 36, 48, 10, 6, flashing ? "#e8f2f6" : "#c8dce8");
-
-  const headX = 28;
-  const headY = 20;
-  px(ctx, headX, headY, 14, 30, "#8a6248");
-  px(ctx, headX + 12, headY, 14, 30, flashing ? "#e8f2f6" : "#c8dce8");
-  px(ctx, headX + 20, headY + 8, 6, 14, flashing ? "#f4fafc" : "#d4e8f0");
-  if (rankId === 0) {
-    px(ctx, headX - 2, headY - 6, 30, 10, "#1a1410");
-    px(ctx, headX - 4, headY + 2, 8, 14, "#1a1410");
-    px(ctx, headX + 22, headY + 2, 8, 10, "#1a1410");
-  } else if (rankId === 1) {
-    px(ctx, headX - 2, headY - 2, 30, 7, "#2a2018");
-    px(ctx, headX + 8, headY - 4, 14, 5, flashing ? "#e8f2f6" : "#c8dce8");
-  } else {
-    px(ctx, headX + 10, headY - 2, 12, 4, "#d8e8ee");
-    px(ctx, headX + 2, headY + 22, 20, 3, "#8a6248");
-  }
-  px(ctx, headX + 6, headY + 12, 3, 3, "#1a1410");
-  px(ctx, headX + 16, headY + 12, 3, 3, "#1a1410");
-  px(ctx, headX + 18, headY + 16, 3, 4, "#a07060");
-
-  px(ctx, 14, 58, 10, 18, "#8a6248");
-  px(ctx, 54, 62, 16, 8, shirt);
-  px(ctx, 66, 76 + tap, 10, 5, flashing ? "#e8f2f6" : "#c8dce8");
-  px(ctx, 72 + tap, 80, 6, 3, flashing ? "#e8f2f6" : "#a8d4e8");
+  layerWall(ctx);
+  layerDesk(ctx);
+  layerProps(ctx);
+  layerMonitor(ctx, holding, flashing);
+  layerBody(ctx, rankId);
+  layerHandsKeys(ctx, tap);
+  layerCrtLight(ctx, holding, flashing, tap);
 }
 
 function pushLog(text, kind) {

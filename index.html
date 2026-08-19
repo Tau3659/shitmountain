@@ -10,23 +10,32 @@
 </head>
 <body>
   <div id="app">
-    <header class="hud" aria-live="polite">
-      <div class="rank-block">
-        <canvas id="face" width="32" height="32" aria-hidden="true"></canvas>
-        <div class="rank-name" id="rank-name">初级</div>
-      </div>
-      <button type="button" id="clock-out" class="clock-out">收工</button>
-    </header>
-    <div class="meters">
-      <div class="meter meter-lines"><span class="lab">屎山</span><span id="lines">0</span></div>
-      <div class="meter meter-good" id="good-wrap"><span class="lab">正确</span><span id="good">0</span></div>
-      <div class="meter meter-bugs" id="bugs-wrap"><span class="lab">Bug</span><span id="bugs">0</span></div>
-    </div>
     <div class="stage">
       <canvas id="scene" width="160" height="120" aria-hidden="true"></canvas>
-      <div class="status" id="status">写屎山</div>
+      <div class="hud-layer">
+        <header class="hud" aria-live="polite">
+          <div class="rank-block">
+            <canvas id="face" width="32" height="32" aria-hidden="true"></canvas>
+            <div class="rank-name" id="rank-name">初级</div>
+          </div>
+          <button type="button" id="clock-out" class="clock-out">收工</button>
+        </header>
+        <div class="meters">
+          <div class="meter meter-lines"><span class="lab">屎山</span><span id="lines">0</span></div>
+          <div class="meter meter-good" id="good-wrap"><span class="lab">正确</span><span id="good">0</span></div>
+          <div class="meter meter-bugs" id="bugs-wrap"><span class="lab">Bug</span><span id="bugs">0</span></div>
+        </div>
+        <div class="status" id="status">写屎山</div>
+      </div>
     </div>
-    <div id="console" class="console" aria-hidden="true"></div>
+    <div class="monitor" aria-hidden="true">
+      <div class="bezel">
+        <div class="screen">
+          <div id="console" class="console"></div>
+          <div class="scanlines"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="intro" class="overlay intro">
