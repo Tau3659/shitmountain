@@ -62,7 +62,7 @@ faceCtx.imageSmoothingEnabled = false;
 sceneCtx.imageSmoothingEnabled = false;
 
 const TAP_FOCUS = 0.6;
-const JUMP_DUR = 0.16;
+const JUMP_DUR = 0.12;
 
 const state = {
   started: false,
@@ -75,7 +75,6 @@ const state = {
   time: 0,
   last: 0,
   focusUntil: 0,
-  jumpsLeft: 0,
   jumpAge: -1,
 };
 
@@ -279,7 +278,6 @@ function resetRun() {
   state.bugs = 0;
   state.log = [];
   state.focusUntil = 0;
-  state.jumpsLeft = 0;
   state.jumpAge = -1;
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
@@ -303,8 +301,7 @@ function tick(now) {
         for (let i = 0; i < dropped; i += 1) {
           pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
         }
-        state.jumpsLeft += dropped;
-        if (state.jumpAge < 0) state.jumpAge = 0;
+        state.jumpAge = 0;
       }
     } else {
       const prevL = state.lines;
@@ -323,10 +320,7 @@ function tick(now) {
 
   if (state.jumpAge >= 0) {
     state.jumpAge += dt;
-    if (state.jumpAge >= JUMP_DUR) {
-      state.jumpsLeft = Math.max(0, state.jumpsLeft - 1);
-      state.jumpAge = state.jumpsLeft > 0 ? 0 : -1;
-    }
+    if (state.jumpAge >= JUMP_DUR) state.jumpAge = -1;
   }
 
   drawFace(state.rank, state.time);
