@@ -107,7 +107,8 @@ html, body {
   align-items: flex-end;
   min-height: 40px;
   padding: 0 calc(14px + var(--safe-right)) 6px calc(14px + var(--safe-left));
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   pointer-events: none;
   overflow: visible;
@@ -119,37 +120,34 @@ html, body {
   gap: 2px;
 }
 
-.meter-lines {
-  color: var(--muted);
+.meter-lines,
+.meter-good,
+.meter-bugs {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text);
+}
+
+.meter-lines #lines,
+.meter-good #good,
+.meter-bugs #bugs {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 .meter-good {
   color: var(--ok);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.meter-good #good {
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
 }
 
 .meter-bugs {
   display: inline-flex;
   align-items: flex-end;
-  height: 36px;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  min-height: 32px;
   padding: 2px 8px;
   transform: translateY(0);
   will-change: transform;
-}
-
-.meter-bugs #bugs {
-  font-size: 28px;
-  font-variant-numeric: tabular-nums;
 }
 
 .meter-bugs.hot {
@@ -190,7 +188,8 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.16em;
   color: var(--warn);
-  text-shadow: 0 2px 0 #0d1117;
+  background: #0d1117;
+  padding: 6px 10px;
   pointer-events: none;
 }
 
