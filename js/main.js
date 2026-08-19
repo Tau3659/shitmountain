@@ -151,70 +151,71 @@ function drawScene(t, holding, rankId, bugs) {
   const W = cw / s;
   const H = ch / s;
 
-  px(ctx, 0, 0, W, H, holding ? "#243044" : "#1a1420");
-  const deskY = Math.floor(H * 0.78);
-  px(ctx, 0, deskY - 8, W, H, "#2b1c12");
-  px(ctx, 0, deskY - 8, W, 3, "#4a3222");
-  px(ctx, 8, deskY, W - 16, 16, "#5a3b24");
-  px(ctx, 14, deskY + 16, 12, H - deskY, "#3a2416");
-  px(ctx, W - 26, deskY + 16, 12, H - deskY, "#3a2416");
-
-  const k = Math.max(1.2, (H * 0.52) / 56);
+  const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
+  const k = Math.max(1.35, (H * 0.55) / 52);
   const u = (n) => Math.max(2, Math.round(n * k));
   const tap = Math.floor(t * 12) % 2 ? u(1) : 0;
+
+  px(ctx, 0, 0, W, H, "#1a1c1e");
+  px(ctx, 0, 0, W, Math.floor(H * 0.64), "#242628");
+  px(ctx, Math.floor(W * 0.62), Math.floor(H * 0.08), Math.floor(W * 0.28), Math.floor(H * 0.34), "#101214");
+  px(ctx, Math.floor(W * 0.64), Math.floor(H * 0.1), Math.floor(W * 0.11), Math.floor(H * 0.14), "#1c2430");
+  px(ctx, Math.floor(W * 0.76), Math.floor(H * 0.12), Math.floor(W * 0.1), Math.floor(H * 0.12), "#181e28");
+  px(ctx, 0, Math.floor(H * 0.6), W, u(3), "#323538");
+  px(ctx, u(4), Math.floor(H * 0.38), u(16), Math.floor(H * 0.24), "#2a2c2e");
+  px(ctx, u(6), Math.floor(H * 0.42), u(12), u(8), "#1a1c1e");
+
+  const deskY = Math.floor(H * 0.72);
+  px(ctx, 0, deskY, W, H - deskY, "#2c2f32");
+  px(ctx, 0, deskY, W, u(10), "#3a3d40");
+  px(ctx, 0, deskY + u(10), W, u(2), "#1e2022");
+
   const cx = Math.floor(W * 0.30);
-  const feetY = deskY;
+  const monW = u(34);
+  const monH = u(50);
+  const monX = Math.floor(W * 0.66);
+  const monY = deskY - monH - u(2);
+  const leak = flashing ? "#d7e8f2" : holding ? "#8aa4b3" : "#5d717c";
+  px(ctx, monX - u(7), monY + u(6), u(7), monH - u(14), leak);
+  px(ctx, monX - u(12), monY + u(12), u(8), monH - u(24), flashing ? "#f2f7fa" : "#6d8490");
 
-  const monW = u(70);
-  const monH = u(48);
-  const monX = Math.floor(W * 0.52);
-  const monY = feetY - monH - u(4);
-  px(ctx, monX, monY, monW, monH, "#111");
-  px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(14), holding ? "#0d2a18" : "#2a1010");
-  const flicker = holding ? 0 : (Math.sin(t * 18) > 0 ? 1 : 0);
-  for (let i = 0; i < 5; i += 1) {
-    const col = holding ? "#3fb950" : (flicker && i % 2 ? "#f85149" : "#e3b341");
-    px(ctx, monX + u(6), monY + u(6) + i * u(6), u(24) + (i * 7) % u(28), u(2), col);
-  }
-  px(ctx, monX + Math.floor(monW / 2) - u(6), monY + monH - u(10), u(12), u(8), "#222");
-  px(ctx, monX + u(16), feetY - u(4), u(36), u(4), "#333");
-  const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  if (flashing) {
-    px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(14), "#e8fff0");
-  }
+  px(ctx, monX, monY, monW, monH, "#1c1e20");
+  px(ctx, monX + u(3), monY + u(3), monW - u(6), monH - u(12), "#121416");
+  px(ctx, monX + u(6), monY + u(8), monW - u(12), u(3), "#2a2d30");
+  px(ctx, monX + Math.floor(monW / 2) - u(5), monY + monH - u(10), u(10), u(8), "#2a2c2e");
+  px(ctx, monX + Math.floor(monW / 2) - u(14), deskY - u(2), u(28), u(4), "#232528");
+  px(ctx, monX - u(18), deskY - u(3), u(24), u(3), "#3e4246");
+  px(ctx, monX - u(16), deskY - u(5) + tap, u(8), u(2), "#4a4e52");
 
-  px(ctx, cx - u(8), feetY - u(10), u(10), u(10), "#1f6feb");
-  px(ctx, cx + u(4), feetY - u(10), u(10), u(10), "#1f6feb");
-  px(ctx, cx - u(6), feetY - u(4), u(8), u(4), "#2b2118");
-  px(ctx, cx + u(6), feetY - u(4), u(8), u(4), "#2b2118");
-
-  const torsoY = feetY - u(40);
-  px(ctx, cx - u(14), torsoY, u(32), u(32), "#1f6feb");
+  const shirt = "#4d565e";
+  const torsoY = deskY - u(34);
+  px(ctx, cx - u(16), torsoY, u(36), u(34), shirt);
   if (rankId === 2) {
-    px(ctx, cx - u(16), torsoY + u(18), u(36), u(14), "#1f6feb");
+    px(ctx, cx - u(18), torsoY + u(14), u(40), u(20), shirt);
   }
-  const headY = torsoY - u(22);
-  px(ctx, cx - u(10), headY, u(24), u(22), "#e2b48a");
+  px(ctx, cx - u(2), torsoY + u(2), u(12), u(16), flashing ? "#c5d0d6" : "#8b969e");
+  const headY = torsoY - u(24);
+  const lit = flashing ? "#ffe8cc" : "#f0d0b0";
+  const shade = "#b88968";
+  px(ctx, cx - u(12), headY, u(14), u(24), shade);
+  px(ctx, cx + u(2), headY, u(16), u(24), lit);
+  px(ctx, cx + u(10), headY + u(6), u(6), u(14), flashing ? "#fff3e0" : lit);
   if (rankId === 0) {
-    px(ctx, cx - u(12), headY - u(8), u(28), u(12), "#2b2118");
-    px(ctx, cx - u(14), headY + u(2), u(8), u(16), "#2b2118");
-    px(ctx, cx + u(14), headY + u(2), u(8), u(16), "#2b2118");
+    px(ctx, cx - u(14), headY - u(8), u(32), u(12), "#2b2118");
+    px(ctx, cx - u(16), headY + u(2), u(8), u(16), "#2b2118");
+    px(ctx, cx + u(16), headY + u(2), u(8), u(12), "#2b2118");
   } else if (rankId === 1) {
-    px(ctx, cx - u(12), headY - u(4), u(28), u(8), "#3a2a1c");
-    px(ctx, cx - u(4), headY - u(6), u(14), u(6), "#e2b48a");
+    px(ctx, cx - u(14), headY - u(4), u(32), u(8), "#3a2a1c");
+    px(ctx, cx - u(2), headY - u(6), u(16), u(6), lit);
   } else {
-    px(ctx, cx - u(4), headY - u(4), u(14), u(5), "#f0d2b0");
+    px(ctx, cx + u(2), headY - u(4), u(14), u(5), "#e8d4b8");
   }
-  px(ctx, cx - u(4), headY + u(10), u(6), u(4), "#3d2918");
-  px(ctx, cx + u(6), headY + u(10), u(6), u(4), "#3d2918");
-px(ctx, cx - u(20), torsoY + u(8), u(12), u(7), "#e2b48a");
-  px(ctx, cx + u(16), torsoY + u(10) + tap, u(18), u(6), "#e2b48a");
-  px(ctx, cx + u(30), feetY - u(3), u(12), u(3), "#c9d1d9");
-
-  if (!holding) {
-    px(ctx, monX + monW - u(10), monY - u(8), u(4), u(4), "#f85149");
-    px(ctx, monX + monW - u(4), monY - u(4), u(3), u(3), "#e3b341");
-  }
+  px(ctx, cx - u(2), headY + u(10), u(5), u(4), "#3d2918");
+  px(ctx, cx + u(8), headY + u(10), u(5), u(4), "#3d2918");
+  px(ctx, cx + u(12), headY + u(12), u(4), u(6), "#c97a6a");
+  px(ctx, cx - u(22), torsoY + u(10), u(12), u(7), shade);
+  px(ctx, cx + u(18), torsoY + u(12) + tap, u(14), u(6), lit);
+  px(ctx, cx + u(28) + tap, deskY - u(6), u(8), u(4), lit);
 }
 
 function pushLog(text, kind) {
