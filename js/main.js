@@ -25,6 +25,17 @@ const SLOP_LINES = [
   "export default null",
 ];
 
+const GOOD_LINES = [
+  "const total = items.reduce((s, n) => s + n, 0)",
+  "if (!node) return null",
+  "el.addEventListener('click', onTap)",
+  "return { ok: true, data }",
+  "const next = Math.max(0, n - 1)",
+  "try { await load() } catch (e) { log(e) }",
+  "export function clamp(v, a, b)",
+  "query.selectAll('.bug').forEach(fix)",
+];
+
 const ERR_LINES = [
   "TypeError: Cannot read properties of undefined",
   "ReferenceError: bug is not defined",
@@ -56,6 +67,7 @@ const el = {
   actions: document.getElementById("sheet-actions"),
   sumRank: document.getElementById("sum-rank"),
   sumNext: document.getElementById("sum-next"),
+  sumGood: document.getElementById("sum-good"),
 };
 
 const faceCtx = el.face.getContext("2d");
@@ -72,6 +84,7 @@ const state = {
   paused: false,
   rank: 0,
   lines: 0,
+  goodLines: 0,
   bugs: 0,
   log: [],
   time: 0,
@@ -147,8 +160,7 @@ function drawScene(t, holding, rankId, bugs) {
 
   const k = Math.max(1.2, (H * 0.52) / 56);
   const u = (n) => Math.max(2, Math.round(n * k));
-  const lean = holding ? 0 : u(3);
-  const tap = !holding && Math.floor(t * 12) % 2 ? u(1) : 0;
+  const tap = Math.floor(t * 12) % 2 ? u(1) : 0;
   const cx = Math.floor(W * 0.30);
   const feetY = deskY;
 
@@ -176,31 +188,27 @@ function drawScene(t, holding, rankId, bugs) {
   px(ctx, cx + u(6), feetY - u(4), u(8), u(4), "#2b2118");
 
   const torsoY = feetY - u(40);
-  px(ctx, cx - u(14) + lean, torsoY, u(32), u(32), "#1f6feb");
+  px(ctx, cx - u(14), torsoY, u(32), u(32), "#1f6feb");
   if (rankId === 2) {
-    px(ctx, cx - u(16) + lean, torsoY + u(18), u(36), u(14), "#1f6feb");
+    px(ctx, cx - u(16), torsoY + u(18), u(36), u(14), "#1f6feb");
   }
   const headY = torsoY - u(22);
-  px(ctx, cx - u(10) + lean, headY, u(24), u(22), "#e2b48a");
+  px(ctx, cx - u(10), headY, u(24), u(22), "#e2b48a");
   if (rankId === 0) {
-    px(ctx, cx - u(12) + lean, headY - u(8), u(28), u(12), "#2b2118");
-    px(ctx, cx - u(14) + lean, headY + u(2), u(8), u(16), "#2b2118");
-    px(ctx, cx + u(14) + lean, headY + u(2), u(8), u(16), "#2b2118");
+    px(ctx, cx - u(12), headY - u(8), u(28), u(12), "#2b2118");
+    px(ctx, cx - u(14), headY + u(2), u(8), u(16), "#2b2118");
+    px(ctx, cx + u(14), headY + u(2), u(8), u(16), "#2b2118");
   } else if (rankId === 1) {
-    px(ctx, cx - u(12) + lean, headY - u(4), u(28), u(8), "#3a2a1c");
-    px(ctx, cx - u(4) + lean, headY - u(6), u(14), u(6), "#e2b48a");
+    px(ctx, cx - u(12), headY - u(4), u(28), u(8), "#3a2a1c");
+    px(ctx, cx - u(4), headY - u(6), u(14), u(6), "#e2b48a");
   } else {
-    px(ctx, cx - u(4) + lean, headY - u(4), u(14), u(5), "#f0d2b0");
+    px(ctx, cx - u(4), headY - u(4), u(14), u(5), "#f0d2b0");
   }
-  px(ctx, cx - u(4) + lean, headY + u(10), u(6), u(4), "#3d2918");
-  px(ctx, cx + u(6) + lean, headY + u(10), u(6), u(4), "#3d2918");
-  if (holding && bugs <= 0) {
-    px(ctx, cx - u(4) + lean, headY + u(11), u(6), u(2), "#e2b48a");
-    px(ctx, cx + u(6) + lean, headY + u(11), u(6), u(2), "#e2b48a");
-  }
-  px(ctx, cx - u(20) + lean, torsoY + u(8), u(12), u(7), "#e2b48a");
-  px(ctx, cx + u(16) + lean, torsoY + u(10) + tap, u(18), u(6), "#e2b48a");
-  px(ctx, cx + u(30) + lean, feetY - u(3), u(12), u(3), "#c9d1d9");
+  px(ctx, cx - u(4), headY + u(10), u(6), u(4), "#3d2918");
+  px(ctx, cx + u(6), headY + u(10), u(6), u(4), "#3d2918");
+px(ctx, cx - u(20), torsoY + u(8), u(12), u(7), "#e2b48a");
+  px(ctx, cx + u(16), torsoY + u(10) + tap, u(18), u(6), "#e2b48a");
+  px(ctx, cx + u(30), feetY - u(3), u(12), u(3), "#c9d1d9");
 
   if (!holding) {
     px(ctx, monX + monW - u(10), monY - u(8), u(4), u(4), "#f85149");
@@ -239,7 +247,8 @@ function renderHud() {
   if (bugs > 0 && bugs !== state.lastBugShown) hopBugMeter();
   state.lastBugShown = bugs;
   const fixing = state.holding;
-  el.status.textContent = fixing ? "改 Bug" : "写屎山";
+  const clean = fixing && Math.floor(state.bugs) <= 0;
+  el.status.textContent = !fixing ? "写屎山" : clean ? "写对的" : "改 Bug";
   el.status.classList.toggle("fixing", fixing);
   el.status.classList.toggle("slop", !fixing);
   document.body.classList.toggle("is-fixing", fixing);
@@ -268,6 +277,7 @@ function openSheet(finalQuit) {
   const lines = Math.floor(state.lines);
   const bugs = Math.floor(state.bugs);
   el.sumLines.textContent = String(lines);
+  el.sumGood.textContent = String(Math.floor(state.goodLines));
   el.sumBugs.textContent = String(bugs);
   el.sumRank.textContent = rank().name;
   const nxt = RANKS[state.rank + 1];
@@ -309,6 +319,7 @@ function resetRun() {
   state.paused = false;
   state.rank = 0;
   state.lines = 0;
+  state.goodLines = 0;
   state.bugs = 0;
   state.log = [];
   state.focusUntil = 0;
@@ -329,12 +340,21 @@ function tick(now) {
   if (state.started && !state.paused) {
     state.holding = state.time < state.focusUntil;
     if (state.holding) {
-      const before = state.bugs;
-      state.bugs = Math.max(0, state.bugs - r.fixPerSec * dt);
-      const dropped = Math.floor(before) - Math.floor(state.bugs);
-      if (dropped > 0) {
-        for (let i = 0; i < dropped; i += 1) {
-          pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
+      if (state.bugs > 0) {
+        const before = state.bugs;
+        state.bugs = Math.max(0, state.bugs - r.fixPerSec * dt);
+        const dropped = Math.floor(before) - Math.floor(state.bugs);
+        if (dropped > 0) {
+          for (let i = 0; i < dropped; i += 1) {
+            pushLog(`fixed  ${ERR_LINES[(Math.floor(before) - i) % ERR_LINES.length]}`, "ok");
+          }
+        }
+      }
+      if (state.bugs <= 0) {
+        const prevG = state.goodLines;
+        state.goodLines += r.linesPerSec * dt;
+        if (Math.floor(state.goodLines) > Math.floor(prevG)) {
+          pushLog(GOOD_LINES[Math.floor(state.goodLines) % GOOD_LINES.length], "ok");
         }
       }
     } else {
