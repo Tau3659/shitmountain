@@ -26,6 +26,13 @@
   --stamp-hi: #1a3a20;
   --stamp-lo: #061008;
   --bug-fill: #3a1c1c;
+  --syn-text: #d0d4d8;
+  --syn-kw: #c58a6a;
+  --syn-str: #48d060;
+  --syn-num: #d4b45a;
+  --syn-com: #8b9094;
+  --syn-fn: #a8d4e8;
+  --syn-ln: #5a5e62;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -334,7 +341,9 @@ button {
   padding: 8px;
   font-size: 12px;
   line-height: 1.2;
-  color: var(--ok);
+  color: var(--syn-text);
+  white-space: pre;
+  tab-size: 2;
 }
 
 .scanlines {
@@ -349,10 +358,44 @@ button {
   );
 }
 
+.console .code-line {
+  display: flex;
+  gap: 8px;
+  min-height: 12px;
+}
+
+.console .ln {
+  flex: 0 0 24px;
+  color: var(--syn-ln);
+  text-align: right;
+}
+
+.console .src {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.console .kw { color: var(--syn-kw); }
+.console .str { color: var(--syn-str); }
+.console .num { color: var(--syn-num); }
+.console .com { color: var(--syn-com); }
+.console .fn { color: var(--syn-fn); }
 .console .err { color: var(--bad); }
 .console .ok { color: var(--ok); }
 .console .dim { color: var(--ok-dim); }
 .console .voice { color: var(--warn); }
+
+.console .bug-line {
+  background: var(--bug-fill);
+}
+
+.console .bug-line .com {
+  color: var(--warn);
+}
+
+.console .ok-line .com {
+  color: var(--ok);
+}
 
 .overlay {
   position: fixed;

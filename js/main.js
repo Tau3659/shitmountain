@@ -22,41 +22,8 @@ import {
   toggleEquip,
 } from "./career.js";
 import { loadBugs, pickBug } from "./bugs.js";
-
-const GOOD_LINES = [
-  "const total = items.reduce((s, n) => s + n, 0)",
-  "if (!node) return null",
-  "el.addEventListener('click', onTap)",
-  "return { ok: true, data }",
-  "const next = Math.max(0, n - 1)",
-  "try { await load() } catch (e) { log(e) }",
-  "export function clamp(v, a, b)",
-  "query.selectAll('.bug').forEach(fix)",
-  "const safe = Number.isFinite(n) ? n : 0",
-  "if (!res.ok) throw new Error(res.statusText)",
-  "return structuredClone(state)",
-  "el.setAttribute('aria-live', 'polite')",
-  "const key = encodeURIComponent(raw)",
-  "await mutex.runExclusive(write)",
-  "if (signal.aborted) return",
-  "const id = crypto.randomUUID()",
-  "return lines.filter((row) => row.trim())",
-  "const url = new URL(path, origin)",
-  "queueMicrotask(() => flush())",
-  "map.set(id, Object.freeze(item))",
-  "for (const row of rows) yield transform(row)",
-  "const html = escape(text)",
-  "db.prepare('SELECT * FROM bugs WHERE id = ?').get(id)",
-  "requestAnimationFrame(tick)",
-  "const left = Math.max(0, budget - used)",
-  "headers.set('Content-Type', 'application/json')",
-  "if (bugs === 0) return rewrite(lines)",
-  "test('clamp', () => expect(clamp(-1, 0, 1)).toBe(0))",
-];
-
-function pick(pool) {
-  return pool[(Math.random() * pool.length) | 0];
-}
+import { loadCode, takeNormal, writeSlop } from "./code.js";
+import { highlight } from "./highlight.js";
 
 function loadMeta() {
   try {
@@ -284,18 +251,17 @@ function escapeHtml(text) {
 
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 24) state.log.shift();
+  if (state.log.length > 40) state.log.shift();
   renderLog();
-}
-
-function pushBug(bug) {
-  pushLog(bug.code, "dim");
-  pushLog(bug.voice, "voice");
 }
 
 function renderLog() {
   el.cons.innerHTML = state.log
-    .map((row) => `<div class="${row.kind}">${escapeHtml(row.text)}</div>`)
+    .map((row, i) => {
+      const nr = String(i + 1).padStart(3, " ");
+      const cls = row.kind === "bug" || row.kind === "err" ? "bug-line" : row.kind === "ok" ? "ok-line" : "";
+      return `<div class="code-line ${cls}"><span class="ln">${nr}</span><span class="src">${highlight(row.text)}</span></div>`;
+    })
     .join("");
   el.cons.scrollTop = el.cons.scrollHeight;
 }
@@ -597,18 +563,24 @@ function tick(now) {
     state.holding = state.time < state.focusUntil;
     const events = stepWork(state, current, dt, state.holding);
     if (events.bugsFixed > 0) {
-      for (let i = 0; i < events.bugsFixed; i += 1) pushLog(`fixed  ${pickBug().code}`, "ok");
+      for (let i = 0; i < events.bugsFixed; i += 1) {
+        pushLog(`// fixed  ${pickBug().code}`, "ok");
+      }
     }
     if (events.converted > 0) {
-      for (let i = 0; i < events.converted; i += 1) pushLog(pick(GOOD_LINES), "ok");
+      for (let i = 0; i < events.converted; i += 1) {
+        pushLog(takeNormal(), "ok");
+      }
     }
-    if (events.slopLines > 0) {
-      for (let i = 0; i < events.slopLines; i += 1) pushBug(pickBug());
-    } else if (events.bugsGained > 0) {
-      for (let i = 0; i < events.bugsGained; i += 1) pushBug(pickBug());
+    if (events.slopLines > 0 || events.bugsGained > 0) {
+      for (const row of writeSlop(events.slopLines, events.bugsGained)) {
+        pushLog(row.text, row.kind);
+      }
     }
     if (events.autoFixed > 0) {
-      for (let i = 0; i < events.autoFixed; i += 1) pushLog("ci 催修  " + pickBug().code, "ok");
+      for (let i = 0; i < events.autoFixed; i += 1) {
+        pushLog(`// ci 催修  ${pickBug().code}`, "ok");
+      }
     }
     if (events.fired) {
       meta.stats.fires += 1;
@@ -681,4 +653,5 @@ state.last = performance.now();
 Promise.all([
   loadGfx().catch((err) => console.error(err)),
   loadBugs().catch((err) => console.error(err)),
+  loadCode().catch((err) => console.error(err)),
 ]).then(() => requestAnimationFrame(tick));
