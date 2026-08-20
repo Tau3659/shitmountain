@@ -156,7 +156,7 @@ faceCtx.imageSmoothingEnabled = false;
 sceneCtx.imageSmoothingEnabled = false;
 
 const TAP_FOCUS = 0.6;
-const FLASH_DUR = 0.09;
+const FLASH_DUR = 0.16;
 
 const state = {
   started: false,
@@ -246,7 +246,7 @@ const SPR = {
   body: { x: 16, y: 60 },
   hands: { x: 20, y: 73 },
   keys: { x: 14, y: 74 },
-  crt: { x: 38, y: 68 },
+  crt: { x: 36, y: 64 },
 };
 
 function blit(ctx, img, x, y) {
@@ -296,9 +296,15 @@ function layerCrtLight(ctx, holding, flashing) {
   if (!gfx.crt) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.globalAlpha = flashing ? 1 : holding ? 0.72 : 0.32;
   ctx.globalCompositeOperation = "screen";
+  ctx.globalAlpha = flashing ? 1 : holding ? 0.7 : 0.28;
   blit(ctx, gfx.crt, SPR.crt.x, SPR.crt.y);
+  if (flashing) {
+    blit(ctx, gfx.crt, SPR.hands.x + 4, SPR.hands.y - 2);
+    ctx.globalAlpha = 1;
+    px(ctx, 38, 63, 2, 2, "#e8f4f8");
+    px(ctx, 40, 65, 3, 2, "#a8d4e8");
+  }
   ctx.restore();
 }
 
@@ -312,7 +318,7 @@ function drawScene(t, holding, rankId) {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const press = (Math.floor(t * 10) % 2) === 1;
+  const press = holding || flashing;
   layerWall(ctx);
   layerDesk(ctx);
   layerProps(ctx);
