@@ -21,7 +21,7 @@ import {
   stepWork,
   toggleEquip,
 } from "./career.js";
-import { BUGS } from "./bugs.js";
+import { loadBugs, pickBug } from "./bugs.js";
 
 const GOOD_LINES = [
   "const total = items.reduce((s, n) => s + n, 0)",
@@ -597,18 +597,18 @@ function tick(now) {
     state.holding = state.time < state.focusUntil;
     const events = stepWork(state, current, dt, state.holding);
     if (events.bugsFixed > 0) {
-      for (let i = 0; i < events.bugsFixed; i += 1) pushLog(`fixed  ${pick(BUGS).code}`, "ok");
+      for (let i = 0; i < events.bugsFixed; i += 1) pushLog(`fixed  ${pickBug().code}`, "ok");
     }
     if (events.converted > 0) {
       for (let i = 0; i < events.converted; i += 1) pushLog(pick(GOOD_LINES), "ok");
     }
     if (events.slopLines > 0) {
-      for (let i = 0; i < events.slopLines; i += 1) pushBug(pick(BUGS));
+      for (let i = 0; i < events.slopLines; i += 1) pushBug(pickBug());
     } else if (events.bugsGained > 0) {
-      for (let i = 0; i < events.bugsGained; i += 1) pushBug(pick(BUGS));
+      for (let i = 0; i < events.bugsGained; i += 1) pushBug(pickBug());
     }
     if (events.autoFixed > 0) {
-      for (let i = 0; i < events.autoFixed; i += 1) pushLog("ci 催修  " + pick(BUGS).code, "ok");
+      for (let i = 0; i < events.autoFixed; i += 1) pushLog("ci 催修  " + pickBug().code, "ok");
     }
     if (events.fired) {
       meta.stats.fires += 1;
@@ -678,7 +678,7 @@ window.addEventListener("keydown", (ev) => {
 
 renderHud();
 state.last = performance.now();
-loadGfx().then(() => requestAnimationFrame(tick)).catch((err) => {
-  console.error(err);
-  requestAnimationFrame(tick);
-});
+Promise.all([
+  loadGfx().catch((err) => console.error(err)),
+  loadBugs().catch((err) => console.error(err)),
+]).then(() => requestAnimationFrame(tick));

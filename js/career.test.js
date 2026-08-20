@@ -22,7 +22,8 @@ import {
   stepWork,
   toggleEquip,
 } from "./career.js";
-import { BUGS } from "./bugs.js";
+import { bugCount, parseBugs, pickBug, setBugs } from "./bugs.js";
+import { readFileSync } from "node:fs";
 
 let failed = 0;
 let passed = 0;
@@ -160,9 +161,14 @@ assert(restored.equipped.includes("ci") && restored.achievements.includes("first
 
 assert(ACHIEVEMENTS.some((a) => a.branch === "clean") && ACHIEVEMENTS.some((a) => a.branch === "chaos"), "both branches have achievements");
 assert(ITEMS.length === 6, "item shop stays small");
-assert(BUGS.length === 100, "100 bug monologues");
+const BUGS = parseBugs(JSON.parse(readFileSync(new URL("../config/bugs.json", import.meta.url), "utf8")));
+assert(setBugs(BUGS) === 100 && bugCount() === 100, "runtime loads 100 bugs from config");
 assert(BUGS.every((bug) => bug.code && bug.voice), "each bug has code and voice");
 assert(new Set(BUGS.map((bug) => bug.code)).size === 100, "bug codes are unique");
+const seen = new Set();
+for (let i = 0; i < 240; i += 1) seen.add(pickBug().code);
+assert(seen.size > 1, "runtime pick is random");
+assert(parseBugs({ bugs: [{ code: "x", voice: "y" }, { code: "", voice: "no" }] }).length === 1, "invalid config rows dropped");
 
 const loadout = emptyMeta();
 loadout.ownedItems = ["ci", "tests"];
