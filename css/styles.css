@@ -94,6 +94,10 @@ button {
   background: var(--bg);
 }
 
+#app:focus {
+  outline: none;
+}
+
 
 .stage {
   position: relative;

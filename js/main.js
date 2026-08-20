@@ -621,10 +621,40 @@ function onDown(ev) {
   ev.preventDefault();
   if (!state.started) startGame();
   poke();
+  grabKeys();
 }
 
+function isSpace(ev) {
+  return ev.code === "Space" || ev.key === " " || ev.key === "Spacebar";
+}
+
+function onKeyDown(ev) {
+  if (!isSpace(ev)) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  if (ev.repeat) return;
+  if (state.paused || state.fired) return;
+  if (!state.started) startGame();
+  poke();
+}
+
+function onKeyUp(ev) {
+  if (!isSpace(ev)) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+}
+
+function grabKeys() {
+  if (typeof el.app.focus === "function") el.app.focus({ preventScroll: true });
+}
+
+el.app.setAttribute("tabindex", "0");
 el.app.addEventListener("pointerdown", onDown);
 el.intro.addEventListener("pointerdown", onDown);
+window.addEventListener("keydown", onKeyDown, { capture: true });
+window.addEventListener("keyup", onKeyUp, { capture: true });
+window.addEventListener("focus", grabKeys);
+grabKeys();
 
 el.clockOut.addEventListener("pointerdown", (ev) => {
   ev.preventDefault();
@@ -639,14 +669,6 @@ el.clockOut.addEventListener("click", (ev) => {
 
 el.shopClose.addEventListener("click", backToSheet);
 el.featClose.addEventListener("click", backToSheet);
-
-window.addEventListener("keydown", (ev) => {
-  if (ev.code !== "Space" || ev.repeat) return;
-  ev.preventDefault();
-  if (state.paused || state.fired) return;
-  if (!state.started) startGame();
-  poke();
-});
 
 renderHud();
 state.last = performance.now();
