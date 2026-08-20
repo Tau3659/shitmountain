@@ -41,7 +41,7 @@ export const RANKS = RANK_NAMES.map((name, id) => {
     id,
     name,
     linesPerSec: round2(6 + id * 1.5),
-    bugsPerSec: round2(2.05 - id * 0.08),
+    bugsPerSec: round2(0.36 - id * 0.012),
     fixPerSec: round2(2.4 + id * 0.48),
     goodEatMul: round2(1 - id * 0.034),
     pay: 8 + id * 5,

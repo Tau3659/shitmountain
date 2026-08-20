@@ -57,10 +57,11 @@ export function formatBugLine(bug, indent = peekIndent()) {
 }
 
 export function planMix(slopCount, bugCount, rng = Math.random) {
-  const extraBugs = Math.max(0, (bugCount | 0) - Math.max(0, slopCount | 0));
   const total = Math.max(0, slopCount | 0);
-  if (total === 0) return Array(Math.max(0, bugCount | 0)).fill("bug");
-  const bugs = Math.max(0, Math.min(bugCount | 0, total));
+  const requested = Math.max(0, bugCount | 0);
+  if (total === 0) return requested > 0 ? ["bug"] : [];
+  const cap = Math.max(1, Math.floor(total / 5));
+  const bugs = Math.min(requested, cap, total);
   const kinds = Array(total).fill("norm");
   const slots = [...Array(total).keys()];
   for (let i = 0; i < bugs; i += 1) {
@@ -70,7 +71,6 @@ export function planMix(slopCount, bugCount, rng = Math.random) {
     slots[j] = tmp;
     kinds[slots[i]] = "bug";
   }
-  for (let i = 0; i < extraBugs; i += 1) kinds.push("bug");
   return kinds;
 }
 

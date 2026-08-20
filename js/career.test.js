@@ -66,6 +66,7 @@ const intern = statsFor(0, emptyMeta());
 const cto = statsFor(MAX_RANK, emptyMeta());
 assert(cto.linesPerSec > intern.linesPerSec, "CTO outputs faster");
 assert(cto.bugsPerSec < intern.bugsPerSec, "CTO bug rate lower");
+assert(intern.bugsPerSec > 0.2 && intern.bugsPerSec < 0.5, "intern bugs stay sparse");
 
 const withCi = emptyMeta();
 withCi.ownedItems = ["ci", "tests"];
@@ -83,7 +84,7 @@ assert(statsFor(0, duckMeta).tapFocus > intern.tapFocus, "duck lengthens focus w
 
 const idle = run();
 const idleEvents = stepWork(idle, intern, 1, false);
-assert(idle.lines > 5 && idle.bugs > 1, "idle writes slop and bugs");
+assert(idle.lines > 5 && idle.bugs > 0.2, "idle writes slop and bugs");
 assert(idleEvents.slopLines >= 5, "idle logs slop lines");
 
 const fixer = run({ bugs: 5, lines: 20 });
@@ -96,7 +97,7 @@ stepWork(rewriter, intern, 1, true);
 assert(rewriter.goodLines >= 5 && rewriter.lines < 20, "holding with 0 bugs converts slop");
 
 const eater = run({ bugs: 0, goodLines: 10, lines: 0 });
-stepWork(eater, { ...intern, goodEatMul: 1 }, 1, false);
+stepWork(eater, { ...intern, goodEatMul: 1, bugsPerSec: 1.2, autoFix: 0 }, 1, false);
 assert(eater.goodLines < 10, "new bugs eat good lines");
 
 const padded = run({ bugs: 0, goodLines: 10 });
@@ -183,8 +184,8 @@ stepWork(healer, statsFor(MAX_RANK, loadout), 5, false);
 assert(healer.bugs < 8, "CTO + CI can nag existing bugs down");
 
 const internIdle = run();
-stepWork(internIdle, statsFor(0, emptyMeta()), 41, false);
-assert(internIdle.fired, "unattended intern is fired around 40s");
+stepWork(internIdle, statsFor(0, emptyMeta()), 210, false);
+assert(internIdle.fired, "unattended intern is fired after a long AFK");
 
 console.log(`${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

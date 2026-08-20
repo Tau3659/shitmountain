@@ -40,12 +40,14 @@ assert(peekIndent() === 0, "indent at function line is 0");
 takeNormal();
 assert(peekIndent() === 2, "indent inside function is 2");
 
-const mixed = planMix(8, 2, () => 0);
-assert(mixed.length === 8, "mix keeps slop length");
+const mixed = planMix(12, 2, () => 0);
+assert(mixed.length === 12, "mix keeps slop length");
 assert(mixed.filter((k) => k === "bug").length === 2, "mix plants requested bugs");
-assert(mixed.filter((k) => k === "norm").length === 6, "rest are normal");
-assert(planMix(0, 3).every((k) => k === "bug") && planMix(0, 3).length === 3, "bug-only tick");
-assert(planMix(2, 5).filter((k) => k === "bug").length === 5, "extra bugs append");
+assert(mixed.filter((k) => k === "norm").length === 10, "rest are normal");
+assert(planMix(0, 0).length === 0, "no lines when nothing was written");
+assert(planMix(0, 3).length === 1 && planMix(0, 3)[0] === "bug", "at most one orphan bug line");
+assert(planMix(2, 5).filter((k) => k === "bug").length === 1, "at most one bug per short batch");
+assert(planMix(12, 8).filter((k) => k === "bug").length === 2, "bug lines capped vs normal code");
 
 setBugs([{ code: "eval(userInput)", voice: "没事的" }]);
 setCode([{ file: "src/x.js", lines: ["  const id = 1"] }]);
