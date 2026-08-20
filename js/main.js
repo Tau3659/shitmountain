@@ -235,6 +235,7 @@ const gfx = {
   head: null,
   body: null,
   hands: null,
+  keys: null,
   crt: null,
   faces: [null, null, null],
 };
@@ -243,6 +244,7 @@ const SPR = {
   head: { x: 10, y: 22 },
   body: { x: 18, y: 42 },
   hands: { x: 34, y: 70 },
+  keys: { x: 34, y: 70 },
   crt: { x: 23, y: 24 },
 };
 
@@ -261,7 +263,7 @@ function drawFace(rankId) {
 }
 
 function loadGfx() {
-  const names = ["head", "body", "hands", "crt", "face-0", "face-1", "face-2"];
+  const names = ["head", "body", "hands", "keys", "crt", "face-0", "face-1", "face-2"];
   return Promise.all(names.map((name) => new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve([name, img]);
@@ -276,11 +278,12 @@ function loadGfx() {
 }
 
 function layerBody(ctx) {
-  blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
   blit(ctx, gfx.head, SPR.head.x, SPR.head.y);
+  blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
 }
 
 function layerHandsKeys(ctx, tap) {
+  blit(ctx, gfx.keys, SPR.keys.x, SPR.keys.y);
   blit(ctx, gfx.hands, SPR.hands.x, SPR.hands.y + tap);
 }
 
