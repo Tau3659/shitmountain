@@ -240,10 +240,10 @@ const gfx = {
 };
 
 const SPR = {
-  head: { x: 9, y: 12 },
+  head: { x: 10, y: 22 },
   body: { x: 18, y: 42 },
   hands: { x: 34, y: 70 },
-  crt: { x: 22, y: 14 },
+  crt: { x: 23, y: 24 },
 };
 
 function blit(ctx, img, x, y) {
