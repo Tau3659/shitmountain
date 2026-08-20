@@ -242,11 +242,11 @@ const gfx = {
 };
 
 const SPR = {
-  head: { x: 16, y: 50 },
+  head: { x: 16, y: 51 },
   body: { x: 16, y: 60 },
   hands: { x: 20, y: 73 },
   keys: { x: 14, y: 74 },
-  crt: { x: 28, y: 56 },
+  crt: { x: 38, y: 68 },
 };
 
 function blit(ctx, img, x, y) {
