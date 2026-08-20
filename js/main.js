@@ -21,9 +21,10 @@ import {
   stepWork,
   toggleEquip,
 } from "./career.js";
-import { loadBugs, pickBug } from "./bugs.js";
-import { loadCode, takeNormal, writeSlop } from "./code.js";
+import { pickBug } from "./bugs.js";
+import { takeNormal, writeSlop } from "./code.js";
 import { highlight } from "./highlight.js";
+import { ATLAS_SRC, SPRITES } from "./atlas.js";
 
 function loadMeta() {
   try {
@@ -151,13 +152,7 @@ function layerMonitor(ctx, holding, flashing) {
 }
 
 const gfx = {
-  head: null,
-  body: null,
-  hands: null,
-  handsPress: null,
-  keys: null,
-  crt: null,
-  faces: [null, null, null],
+  atlas: null,
 };
 
 const SPR = {
@@ -168,56 +163,60 @@ const SPR = {
   crt: { x: 28, y: 56 },
 };
 
-function blit(ctx, img, x, y) {
-  if (!img) return;
+function blit(ctx, name, x, y) {
+  const atlas = gfx.atlas;
+  const spr = SPRITES[name];
+  if (!atlas || !spr) return;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, x | 0, y | 0);
+  ctx.drawImage(atlas, spr.x, spr.y, spr.w, spr.h, x | 0, y | 0, spr.w, spr.h);
 }
 
 function drawFace(rankId) {
   const ctx = faceCtx;
+  const atlas = gfx.atlas;
+  const spr = SPRITES[`face-${faceIndex(rankId)}`] || SPRITES["face-0"];
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, 32, 32);
-  const img = gfx.faces[faceIndex(rankId)] || gfx.faces[0];
-  if (!img) return;
-  const x = (32 - img.width) >> 1;
-  const y = (32 - img.height) >> 1;
-  ctx.drawImage(img, x, y);
+  if (!atlas || !spr) return;
+  const x = (32 - spr.w) >> 1;
+  const y = (32 - spr.h) >> 1;
+  ctx.drawImage(atlas, spr.x, spr.y, spr.w, spr.h, x, y, spr.w, spr.h);
 }
 
 function loadGfx() {
-  const names = ["head", "body", "hands", "hands-press", "keys", "crt", "face-0", "face-1", "face-2"];
-  return Promise.all(names.map((name) => new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve([name, img]);
-    img.onerror = () => reject(new Error(name));
-    img.src = `img/${name}.png`;
-  }))).then((pairs) => {
-    for (const [name, img] of pairs) {
-      if (name.startsWith("face-")) gfx.faces[Number(name.slice(5))] = img;
-      else if (name === "hands-press") gfx.handsPress = img;
-      else gfx[name] = img;
+    img.decoding = "async";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("atlas"));
+    img.src = ATLAS_SRC;
+  }).then(async (img) => {
+    try {
+      if (img.decode) await img.decode();
+    } catch {
+      // decode() is best-effort; onload already means the bitmap is usable
     }
+    gfx.atlas = img;
   });
 }
 
 function layerBody(ctx) {
-  blit(ctx, gfx.head, SPR.head.x, SPR.head.y);
-  blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
+  blit(ctx, "head", SPR.head.x, SPR.head.y);
+  blit(ctx, "body", SPR.body.x, SPR.body.y);
 }
 
 function layerHandsKeys(ctx, press) {
-  blit(ctx, gfx.keys, SPR.keys.x, SPR.keys.y);
-  blit(ctx, press ? gfx.handsPress : gfx.hands, SPR.hands.x, SPR.hands.y);
+  blit(ctx, "keys", SPR.keys.x, SPR.keys.y);
+  blit(ctx, press ? "handsPress" : "hands", SPR.hands.x, SPR.hands.y);
 }
 
 function layerCrtLight(ctx, holding, flashing) {
-  if (!gfx.crt) return;
+  if (!gfx.atlas) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
   ctx.globalAlpha = flashing ? 1 : holding ? 0.72 : 0.32;
   ctx.globalCompositeOperation = "screen";
-  blit(ctx, gfx.crt, SPR.crt.x, SPR.crt.y);
+  blit(ctx, "crt", SPR.crt.x, SPR.crt.y);
   ctx.restore();
 }
 
@@ -672,8 +671,5 @@ el.featClose.addEventListener("click", backToSheet);
 
 renderHud();
 state.last = performance.now();
-Promise.all([
-  loadGfx().catch((err) => console.error(err)),
-  loadBugs().catch((err) => console.error(err)),
-  loadCode().catch((err) => console.error(err)),
-]).then(() => requestAnimationFrame(tick));
+requestAnimationFrame(tick);
+loadGfx().catch((err) => console.error(err));

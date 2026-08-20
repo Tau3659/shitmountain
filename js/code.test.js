@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { highlight } from "./highlight.js";
-import { formatBugLine, parseCode, peekIndent, planMix, setCode, takeNormal, writeSlop } from "./code.js";
-import { setBugs } from "./bugs.js";
+import { formatBugLine, loadCode, parseCode, peekIndent, planMix, setCode, takeNormal, writeSlop } from "./code.js";
+import { bugCount, loadBugs, setBugs } from "./bugs.js";
+import { ATLAS_SRC, SPRITES } from "./atlas.js";
 
 let failed = 0;
 let passed = 0;
@@ -14,6 +15,12 @@ function assert(cond, msg) {
   failed += 1;
   console.error("FAIL", msg);
 }
+
+assert(SPRITES.head.w === 24 && SPRITES.body.w === 28 && SPRITES["face-2"].x === 192, "atlas sprite rects");
+assert(String(ATLAS_SRC).includes("atlas.png"), "atlas url points at packed sheet");
+assert(bugCount() === 100, "bugs bundled at import");
+assert((await loadBugs()).length === 100, "loadBugs uses bundled config");
+assert((await loadCode()).length >= 4, "loadCode uses bundled config");
 
 const html = highlight("const total = items.reduce((s, n) => s + n, 0)");
 assert(html.includes('class="kw"') && html.includes("const"), "keyword colored");

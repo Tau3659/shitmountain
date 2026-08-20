@@ -2,6 +2,8 @@
   font-family: "FusionPixel";
   src: url("../fonts/fusion-pixel-12.woff2") format("woff2");
   font-display: swap;
+  font-style: normal;
+  font-weight: 400;
 }
 
 :root {

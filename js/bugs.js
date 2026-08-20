@@ -1,3 +1,5 @@
+import bundledRaw from "../config/bugs.json" with { type: "json" };
+
 export const BUGS_CONFIG_URL = new URL("../config/bugs.json", import.meta.url).href;
 
 const FALLBACK = {
@@ -32,7 +34,15 @@ export function pickBug() {
   return pool[(Math.random() * pool.length) | 0];
 }
 
+const bundled = parseBugs(bundledRaw);
+setBugs(bundled);
+
 export async function loadBugs(url = BUGS_CONFIG_URL) {
+  if (!url || url === BUGS_CONFIG_URL) {
+    if (!bundled.length) throw new Error("bugs config empty");
+    setBugs(bundled);
+    return pool;
+  }
   const res = await fetch(url);
   if (!res.ok) throw new Error(`bugs config ${res.status}`);
   const parsed = parseBugs(await res.json());

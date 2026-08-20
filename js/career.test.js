@@ -162,6 +162,7 @@ assert(restored.equipped.includes("ci") && restored.achievements.includes("first
 
 assert(ACHIEVEMENTS.some((a) => a.branch === "clean") && ACHIEVEMENTS.some((a) => a.branch === "chaos"), "both branches have achievements");
 assert(ITEMS.length === 6, "item shop stays small");
+assert(bugCount() === 100, "bugs bundled at import");
 const BUGS = parseBugs(JSON.parse(readFileSync(new URL("../config/bugs.json", import.meta.url), "utf8")));
 assert(setBugs(BUGS) === 100 && bugCount() === 100, "runtime loads 100 bugs from config");
 assert(BUGS.every((bug) => bug.code && bug.voice), "each bug has code and voice");

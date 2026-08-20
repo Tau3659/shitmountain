@@ -1,3 +1,4 @@
+import bundledRaw from "../config/code.json" with { type: "json" };
 import { pickBug } from "./bugs.js";
 
 export const CODE_CONFIG_URL = new URL("../config/code.json", import.meta.url).href;
@@ -83,7 +84,15 @@ export function writeSlop(slopCount, bugCount, rng = Math.random) {
   });
 }
 
+const bundled = parseCode(bundledRaw);
+setCode(bundled);
+
 export async function loadCode(url = CODE_CONFIG_URL) {
+  if (!url || url === CODE_CONFIG_URL) {
+    if (!bundled.length) throw new Error("code config empty");
+    setCode(bundled);
+    return bundled;
+  }
   const res = await fetch(url);
   if (!res.ok) throw new Error(`code config ${res.status}`);
   const parsed = parseCode(await res.json());
