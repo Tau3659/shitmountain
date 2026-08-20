@@ -1,0 +1,404 @@
+{
+  "bugs": [
+    {
+      "code": "function foo() { return foo() }",
+      "voice": "递归它自己总会停的吧，栈又不是纸做的。"
+    },
+    {
+      "code": "const x = x ?? x ?? x",
+      "voice": "套三层空值，这下总有一个是活的。"
+    },
+    {
+      "code": "if (true) if (true) if (true) {}",
+      "voice": "条件先写死，逻辑回头再填，会议马上开始。"
+    },
+    {
+      "code": "eval(userInput)",
+      "voice": "用户不会乱敲的，eval 多方便啊。"
+    },
+    {
+      "code": "copy(); paste(); copy(); paste();",
+      "voice": "这段在别的文件能跑，搬过来也一样。"
+    },
+    {
+      "code": "git push --force origin main",
+      "voice": "就我一个人在用这条分支，撞不上的。"
+    },
+    {
+      "code": "TODO: 以后再改",
+      "voice": "先过审，以后的我会感谢现在的我。"
+    },
+    {
+      "code": "catch (e) { /* ignore */ }",
+      "voice": "报错也解决不了，不如当没看见。"
+    },
+    {
+      "code": "setInterval(run, 1)",
+      "voice": "1 毫秒轮一次，实时性拉满。"
+    },
+    {
+      "code": "document.write(innerHTML)",
+      "voice": "能写进去就行，DOM 自己会收拾的。"
+    },
+    {
+      "code": "let a = 1; a = a = a",
+      "voice": "赋值三次，稳得像焊死。"
+    },
+    {
+      "code": "while (true) console.log('ok')",
+      "voice": "先打日志证明它还活着。"
+    },
+    {
+      "code": "undefined.doThing()",
+      "voice": "这变量刚才还在，不可能空。"
+    },
+    {
+      "code": "password = '123456'",
+      "voice": "内部环境，谁会拿这个密码去撞。"
+    },
+    {
+      "code": "new Array(999999).fill(0)",
+      "voice": "预分配一次，后面就不用扩容了。"
+    },
+    {
+      "code": "// 临时方案 2019",
+      "voice": "注释写了年份，就不算永久临时。"
+    },
+    {
+      "code": "fix fix fix asdf",
+      "voice": "手在修，心已经下班了。"
+    },
+    {
+      "code": "export default null",
+      "voice": "先占个坑，导入的人自己判断。"
+    },
+    {
+      "code": "await fetch('/api').then(r => r)",
+      "voice": "then 了就等于处理了。"
+    },
+    {
+      "code": "if (data) if (data.data) if (data.data.data) use(data.data.data.item)",
+      "voice": "后端套几层我就拆几层，很尊重现实。"
+    },
+    {
+      "code": "JSON.parse(localStorage.user)",
+      "voice": "本地存的还能不是 JSON？"
+    },
+    {
+      "code": "setTimeout(save, 0); setTimeout(save, 0); setTimeout(save, 0)",
+      "voice": "存三次总有一次写进磁盘。"
+    },
+    {
+      "code": "return res.data.data.data.list || res || []",
+      "voice": "哪一层有货就吃哪一层，兜底是空数组。"
+    },
+    {
+      "code": "obj['__proto__'] = obj",
+      "voice": "让它认自己当爹，继承关系就清晰了。"
+    },
+    {
+      "code": "for (var i = 0; i < 10; i++) { i = 0 }",
+      "voice": "i 重置一下，循环更有耐心。"
+    },
+    {
+      "code": "console.log('debug', secretKey, token, pwd)",
+      "voice": "不打出来怎么知道登录没成功。"
+    },
+    {
+      "code": "window.location = userUrl",
+      "voice": "跳转需求，用户指向哪我跳哪。"
+    },
+    {
+      "code": "document.cookie = 'admin=1; path=/'",
+      "voice": "本地装一下管理员，调试快。"
+    },
+    {
+      "code": "Number(undefined) + Number(null) * '2'",
+      "voice": "都转成数字了，怎么还能算错。"
+    },
+    {
+      "code": "try { risky() } finally { risky() }",
+      "voice": "失败了再冒险一次，成全它。"
+    },
+    {
+      "code": "new Date(userDate).getTime() || Date.now() || 0 || 1",
+      "voice": "时间总能给一个，大不了从 1970 开始。"
+    },
+    {
+      "code": "arr[-1] = '垫一下'",
+      "voice": "负一当栈顶，感觉很数学。"
+    },
+    {
+      "code": "Promise.resolve().then(() => Promise.resolve().then(loop))",
+      "voice": "微任务套微任务，不卡住页面。"
+    },
+    {
+      "code": "cssText += 'position:fixed;'",
+      "voice": "先顶上去，产品说遮挡以后再说。"
+    },
+    {
+      "code": "innerHTML = comment + userName",
+      "voice": "昵称里能有什么，顶多一个表情。"
+    },
+    {
+      "code": "Math.random() * 0",
+      "voice": "乘 0 也是随机家族的一员。"
+    },
+    {
+      "code": "if (count == '0') count = 0; else count = count",
+      "voice": "字符串零和数字零，我都认。"
+    },
+    {
+      "code": "export const API = 'http://10.0.0.3:8080'",
+      "voice": "内网 IP 写死，部署的人会改的。"
+    },
+    {
+      "code": "void function(){ arguments.callee() }()",
+      "voice": "callee 多经典，严格模式关一下就好。"
+    },
+    {
+      "code": "let lock = false; lock = !lock; lock = !lock",
+      "voice": "锁开开关关，状态回到原点，安全。"
+    },
+    {
+      "code": "switch (type) { default: break; default: break }",
+      "voice": "两个 default，总有一个能接住。"
+    },
+    {
+      "code": "fs.writeFileSync('/tmp/prod.json', JSON.stringify(state))",
+      "voice": "生产也是一台机器，tmp 一样能写。"
+    },
+    {
+      "code": "user.age = user.age || user.Age || user.AGE || 18",
+      "voice": "字段大小写我全要，成年人默认十八。"
+    },
+    {
+      "code": "parseInt('08') + parseInt('09')",
+      "voice": "八加九等于十七，整数世界很单纯。"
+    },
+    {
+      "code": "typeof NaN === 'number' && NaN == NaN",
+      "voice": "它是数字还自己等于自己，完美。"
+    },
+    {
+      "code": "btn.onclick = btn.onclick = btn.onclick = save",
+      "voice": "绑三次，点击一定能进 save。"
+    },
+    {
+      "code": "// 线上先这样，周五再清",
+      "voice": "周五有发布窗口，今天别动土。"
+    },
+    {
+      "code": "throw '别问，问就是历史包袱'",
+      "voice": "字符串也能扔，类型系统管不着情绪。"
+    },
+    {
+      "code": "merge(a, merge(a, merge(a, b)))",
+      "voice": "自己跟自己合并三次，冲突会消掉。"
+    },
+    {
+      "code": "cache[key] = cache[key] || cache[key] || uncached()",
+      "voice": "缓存里没有就再看一眼缓存。"
+    },
+    {
+      "code": "id = id || ids[0] || ids[ids.length] || 'id'",
+      "voice": "实在没有就叫 id，名字已经很诚实。"
+    },
+    {
+      "code": "sleep(5000) // 等接口自己好",
+      "voice": "睡五秒，对方机房会感到压力。"
+    },
+    {
+      "code": "if (user) if (user) if (user.id) login(user)",
+      "voice": "确认三遍他是个人，再登录。"
+    },
+    {
+      "code": "return list.length ? list : list",
+      "voice": "有也返回，没有也返回，接口稳。"
+    },
+    {
+      "code": "JSON.stringify(obj, (k, v) => v === undefined ? obj : v)",
+      "voice": "undefined 就整坨塞回去，别丢字段。"
+    },
+    {
+      "code": "await Promise.all(tasks.map(t => t()))",
+      "voice": "一起飞，一起炸也算同步。"
+    },
+    {
+      "code": "el.style.display = el.style.display",
+      "voice": "赋值给自己，浏览器会重新想想。"
+    },
+    {
+      "code": "const flag = flag || !flag || true",
+      "voice": "怎么都能变成 true，功能开着就行。"
+    },
+    {
+      "code": "db.query('SELECT * FROM users WHERE name = \\'' + name + '\\'')",
+      "voice": "拼 SQL 多直观，名字里哪来单引号。"
+    },
+    {
+      "code": "localStorage.setItem('token', token)",
+      "voice": "放本地最方便，关页面还在。"
+    },
+    {
+      "code": "headers['Access-Control-Allow-Origin'] = '*'",
+      "voice": "CORS 全放行，联调再也不红。"
+    },
+    {
+      "code": "process.env.NODE_ENV = 'production'",
+      "voice": "代码里改成生产，构建脚本可以省了。"
+    },
+    {
+      "code": "Math.max() ",
+      "voice": "不传参数就是最大，空即无限。"
+    },
+    {
+      "code": "new Date('2024-13-40')",
+      "voice": "日期对象自己会进位，放心交给它。"
+    },
+    {
+      "code": "parseFloat('1.2.3')",
+      "voice": "它会从左边认出一个合法小数。"
+    },
+    {
+      "code": "arr.split('')",
+      "voice": "数组没有 split 再说，先当字符串用。"
+    },
+    {
+      "code": "for (const k in array) total += k",
+      "voice": "in 能遍历就行，下标加起来也是数。"
+    },
+    {
+      "code": "setState({ n: this.state.n++ })",
+      "voice": "又读又写，一次更新两次快乐。"
+    },
+    {
+      "code": "useEffect(() => fetchData(), )",
+      "voice": "依赖先空着，少一次警告。"
+    },
+    {
+      "code": "key={index}",
+      "voice": "下标当 key，列表又不会乱插。"
+    },
+    {
+      "code": "dangerouslySetInnerHTML={{ __html: html }}",
+      "voice": "名字都警告了，说明官方认这用法。"
+    },
+    {
+      "code": "if (price = 0) return 'free'",
+      "voice": "赋值也能当判断，免费逻辑一次到位。"
+    },
+    {
+      "code": "n.toFixed(2) + 1",
+      "voice": "先变成字符串再加一，拼接也是加。"
+    },
+    {
+      "code": "await setTimeout(resolve, 1000)",
+      "voice": "await 一下定时器，它肯定返回 Promise。"
+    },
+    {
+      "code": "import moment from 'moment'",
+      "voice": "项目已经 2MB 了，不差这一个。"
+    },
+    {
+      "code": "fs.readFileSync('/etc/passwd')",
+      "voice": "读一下系统文件看权限通不通。"
+    },
+    {
+      "code": "crypto.createHash('md5').update(password)",
+      "voice": "MD5 够快，密码又不是去银行。"
+    },
+    {
+      "code": "res.send(req.query)",
+      "voice": "调试把查询原样甩回去，方便。"
+    },
+    {
+      "code": "app.listen(80)",
+      "voice": "生产就该 80，少一层 Nginx。"
+    },
+    {
+      "code": "while (i < 10) i",
+      "voice": "条件在，i 在，循环自己会走。"
+    },
+    {
+      "code": "Object.prototype.hack = 1",
+      "voice": "挂到原型上，全世界都能用。"
+    },
+    {
+      "code": "delete Array.prototype.map",
+      "voice": "这项目不用 map，删了省事。"
+    },
+    {
+      "code": "Number.MAX_VALUE + 1 === Number.MAX_VALUE",
+      "voice": "都是最大了，再加也还是最大，合理。"
+    },
+    {
+      "code": "if (arr.length = 0) return",
+      "voice": "长度清零顺便当空判断，一行两用。"
+    },
+    {
+      "code": "JSON.parse('{a:1}')",
+      "voice": "键名加不加引号，人能看懂就行。"
+    },
+    {
+      "code": "new Function('return ' + code)()",
+      "voice": "比 eval 高级，听着像编译器。"
+    },
+    {
+      "code": "buffer = buffer + chunk",
+      "voice": "字符串累加分片，内存会理解我的。"
+    },
+    {
+      "code": "socket.write(socket.read())",
+      "voice": "读到什么写回去，回声服务器完成。"
+    },
+    {
+      "code": "git checkout .",
+      "voice": "本地改乱了，全部扔最干净。"
+    },
+    {
+      "code": "chmod 777 -R .",
+      "voice": "权限问题一次给足，别再报 EACCES。"
+    },
+    {
+      "code": "SELECT * FROM orders",
+      "voice": "先全捞出来，筛选放前端也很灵活。"
+    },
+    {
+      "code": "WHERE 1=1 OR 1=1",
+      "voice": "条件恒真，查不到再收。"
+    },
+    {
+      "code": "idx = hashmap[key] ?? hashmap[key]",
+      "voice": "空了再取一次，哈希会心软的。"
+    },
+    {
+      "code": "thread.sleep(0)",
+      "voice": "睡 0 秒也是让出时间片。"
+    },
+    {
+      "code": "catch (e) { throw e; throw e }",
+      "voice": "抛两次，调用方更重视。"
+    },
+    {
+      "code": "return undefined; return 1",
+      "voice": "死代码也是代码，以后可能走到。"
+    },
+    {
+      "code": "x | 0 | 0 | 0",
+      "voice": "按位截三次，整数纯度拉满。"
+    },
+    {
+      "code": "!![] + !![] + !![]",
+      "voice": "三个真加起来就是 3，类型转换为证。"
+    },
+    {
+      "code": "document.domain = 'com'",
+      "voice": "域放宽一点，iframe 就能说话。"
+    },
+    {
+      "code": "history.pushState({}, '', '#')",
+      "voice": "哈希拨一下，路由就算切换了。"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "shitmountain",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node js/career.test.js && node js/code.test.js"
+  }
+}

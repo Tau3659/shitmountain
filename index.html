@@ -16,7 +16,10 @@
         <header class="hud" aria-live="polite">
           <div class="rank-block">
             <canvas id="face" width="32" height="32" aria-hidden="true"></canvas>
-            <div class="rank-name" id="rank-name">初级</div>
+            <div class="rank-meta">
+              <div class="rank-name" id="rank-name">实习生</div>
+              <div class="wallet" id="wallet">¥ 0</div>
+            </div>
           </div>
           <button type="button" id="clock-out" class="clock-out">收工</button>
         </header>
@@ -39,21 +42,45 @@
   </div>
 
   <div id="intro" class="overlay intro">
-    <p class="intro-copy">点屏幕改 bug</p>
+    <p class="intro-copy">点屏幕改 bug<br>0 bug 才能晋升</p>
   </div>
 
   <div id="sheet" class="overlay sheet hidden" role="dialog" aria-modal="true">
     <div class="sheet-card">
       <h2 id="sheet-title">收工</h2>
+      <p id="sheet-note" class="sheet-note">清流：0 bug，可以晋升</p>
       <ul class="scoreboard">
-        <li><span>职称</span><strong id="sum-rank">初级</strong></li>
-        <li><span>下一级</span><strong id="sum-next">中级</strong></li>
+        <li><span>职称</span><strong id="sum-rank">实习生</strong></li>
+        <li><span>下一级</span><strong id="sum-next">试用</strong></li>
         <li><span>屎山行数</span><strong id="sum-lines">0</strong></li>
         <li><span>正确行数</span><strong id="sum-good">0</strong></li>
         <li><span>Bug</span><strong id="sum-bugs">0</strong></li>
+        <li><span>本局工资</span><strong id="sum-pay">¥ 0</strong></li>
+        <li><span>存款</span><strong id="sum-money">¥ 0</strong></li>
       </ul>
       <div id="clear-stamp" class="stamp hidden">0 BUG<br>通关</div>
       <div class="sheet-actions" id="sheet-actions"></div>
+    </div>
+  </div>
+
+  <div id="shop" class="overlay hidden" role="dialog" aria-modal="true">
+    <div class="sheet-card shop-card">
+      <h2>道具</h2>
+      <p id="shop-money" class="sheet-note">¥ 0</p>
+      <div id="shop-list" class="shop-list"></div>
+      <div class="sheet-actions">
+        <button type="button" id="shop-close">返回</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="feats" class="overlay hidden" role="dialog" aria-modal="true">
+    <div class="sheet-card shop-card">
+      <h2>成就</h2>
+      <ul id="feat-list" class="feat-list"></ul>
+      <div class="sheet-actions">
+        <button type="button" id="feat-close">返回</button>
+      </div>
     </div>
   </div>
 
