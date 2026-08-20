@@ -241,11 +241,11 @@ const gfx = {
 };
 
 const SPR = {
-  head: { x: 10, y: 22 },
+  head: { x: 9, y: 13 },
   body: { x: 18, y: 42 },
-  hands: { x: 34, y: 70 },
-  keys: { x: 34, y: 70 },
-  crt: { x: 23, y: 24 },
+  hands: { x: 18, y: 66 },
+  keys: { x: 12, y: 72 },
+  crt: { x: 40, y: 18 },
 };
 
 function blit(ctx, img, x, y) {
@@ -307,7 +307,7 @@ function drawScene(t, holding, rankId) {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const tap = Math.floor(t * 10) % 2;
+  const tap = (Math.floor(t * 10) % 2) * 2;
   layerWall(ctx);
   layerDesk(ctx);
   layerProps(ctx);
