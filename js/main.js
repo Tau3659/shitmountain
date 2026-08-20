@@ -235,17 +235,18 @@ const gfx = {
   head: null,
   body: null,
   hands: null,
+  handsPress: null,
   keys: null,
   crt: null,
   faces: [null, null, null],
 };
 
 const SPR = {
-  head: { x: 13, y: 0 },
-  body: { x: 14, y: 33 },
-  hands: { x: 18, y: 62 },
-  keys: { x: 12, y: 70 },
-  crt: { x: 36, y: 8 },
+  head: { x: 16, y: 50 },
+  body: { x: 16, y: 60 },
+  hands: { x: 20, y: 73 },
+  keys: { x: 14, y: 74 },
+  crt: { x: 28, y: 56 },
 };
 
 function blit(ctx, img, x, y) {
@@ -259,11 +260,14 @@ function drawFace(rankId) {
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, 32, 32);
   const img = gfx.faces[rankId] || gfx.faces[0];
-  if (img) ctx.drawImage(img, 0, 0, 32, 32);
+  if (!img) return;
+  const x = (32 - img.width) >> 1;
+  const y = (32 - img.height) >> 1;
+  ctx.drawImage(img, x, y);
 }
 
 function loadGfx() {
-  const names = ["head", "body", "hands", "keys", "crt", "face-0", "face-1", "face-2"];
+  const names = ["head", "body", "hands", "hands-press", "keys", "crt", "face-0", "face-1", "face-2"];
   return Promise.all(names.map((name) => new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve([name, img]);
@@ -272,6 +276,7 @@ function loadGfx() {
   }))).then((pairs) => {
     for (const [name, img] of pairs) {
       if (name.startsWith("face-")) gfx.faces[Number(name.slice(5))] = img;
+      else if (name === "hands-press") gfx.handsPress = img;
       else gfx[name] = img;
     }
   });
@@ -282,9 +287,9 @@ function layerBody(ctx) {
   blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
 }
 
-function layerHandsKeys(ctx, tap) {
+function layerHandsKeys(ctx, press) {
   blit(ctx, gfx.keys, SPR.keys.x, SPR.keys.y);
-  blit(ctx, gfx.hands, SPR.hands.x, SPR.hands.y + tap);
+  blit(ctx, press ? gfx.handsPress : gfx.hands, SPR.hands.x, SPR.hands.y);
 }
 
 function layerCrtLight(ctx, holding, flashing) {
@@ -307,13 +312,13 @@ function drawScene(t, holding, rankId) {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const tap = (Math.floor(t * 10) % 2) * 2;
+  const press = (Math.floor(t * 10) % 2) === 1;
   layerWall(ctx);
   layerDesk(ctx);
   layerProps(ctx);
   layerMonitor(ctx, holding, flashing);
   layerBody(ctx);
-  layerHandsKeys(ctx, tap);
+  layerHandsKeys(ctx, press);
   layerCrtLight(ctx, holding, flashing);
 }
 
