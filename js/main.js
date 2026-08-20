@@ -240,10 +240,10 @@ const gfx = {
 };
 
 const SPR = {
-  head: { x: 6, y: 10 },
-  body: { x: 18, y: 46 },
-  hands: { x: 36, y: 74 },
-  crt: { x: 20, y: 12 },
+  head: { x: 9, y: 12 },
+  body: { x: 18, y: 42 },
+  hands: { x: 34, y: 70 },
+  crt: { x: 22, y: 14 },
 };
 
 function blit(ctx, img, x, y) {
@@ -339,6 +339,7 @@ function hurtGoodMeter() {
   node.classList.remove("hurt");
   void node.offsetWidth;
   node.classList.add("hurt");
+  node.addEventListener("animationend", () => node.classList.remove("hurt"), { once: true });
 }
 
 function renderHud() {

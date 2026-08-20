@@ -195,24 +195,37 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-.meter-good {
-  color: var(--ok);
+.meter-lines,
+.meter-lines .lab,
+.meter-lines #lines {
+  color: #d0d4d8;
+}
+
+.meter-good,
+.meter-good .lab,
+.meter-good #good {
+  color: #48d060;
   transform: translateY(0);
   will-change: transform;
 }
 
 .meter-good.hurt {
-  color: var(--bad);
-  animation: meter-hop 0.12s steps(2, end);
+  animation: meter-hurt 0.12s steps(2, end);
 }
 
 .meter-bugs {
+  color: #d0d4d8;
   transform: translateY(0);
   will-change: transform;
 }
 
+.meter-bugs .lab,
+.meter-bugs #bugs {
+  color: inherit;
+}
+
 .meter-bugs.hot {
-  color: var(--bad);
+  color: #d45a4a;
   background: #3a1c1c;
 }
 
@@ -224,6 +237,11 @@ button {
   0% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
   100% { transform: translateY(0); }
+}
+
+@keyframes meter-hurt {
+  0%, 50% { color: #d45a4a; transform: translateY(-4px); }
+  100% { color: #48d060; transform: translateY(0); }
 }
 
 .status {
