@@ -352,6 +352,7 @@ button {
 .console .err { color: var(--bad); }
 .console .ok { color: var(--ok); }
 .console .dim { color: var(--ok-dim); }
+.console .voice { color: var(--warn); }
 
 .overlay {
   position: fixed;
