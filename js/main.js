@@ -11,7 +11,6 @@ import {
   emptyMeta,
   emptyRun,
   equippedItems,
-  faceIndex,
   grantPay,
   markClockOut,
   nextRankName,
@@ -24,7 +23,7 @@ import {
 import { pickBug } from "./bugs.js";
 import { takeNormal, writeSlop } from "./code.js";
 import { highlight } from "./highlight.js";
-import { ATLAS_SRC, SPRITES } from "./atlas.js";
+import { FACE, SCENE_SRC } from "./gfx.js";
 
 function loadMeta() {
   try {
@@ -117,70 +116,20 @@ function dither(ctx, x, y, w, h, a, b) {
 
 function layerWall(ctx) {
   dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
-}
-
-function layerDesk(ctx) {
-  px(ctx, 0, 84, 160, 36, "#2a2624");
-  px(ctx, 0, 84, 160, 6, "#3c3834");
-  px(ctx, 0, 84, 160, 1, "#4a4640");
-  px(ctx, 0, 90, 160, 1, "#1a1816");
-}
-
-function layerProps(ctx) {
-  px(ctx, 2, 76, 10, 8, "#d0d4d8");
-  px(ctx, 3, 74, 8, 3, "#8b9094");
-  px(ctx, 3, 78, 8, 1, "#7a7e82");
-  px(ctx, 2, 68, 7, 7, "#4a4e52");
-  px(ctx, 3, 66, 5, 3, "#3a3c40");
-  px(ctx, 4, 64, 3, 3, "#d0d4d8");
-}
-
-function layerMonitor(ctx, holding, flashing) {
-  const leak = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#5a7a88";
-  px(ctx, 94, 38, 4, 36, leak);
-  if (flashing) px(ctx, 92, 42, 3, 26, "#c8e4f0");
-  px(ctx, 98, 30, 50, 54, "#6a6e68");
-  px(ctx, 100, 32, 46, 48, "#3a3c3a");
-  px(ctx, 104, 36, 38, 8, "#2a2c2a");
-  px(ctx, 108, 48, 30, 2, "#4a4c4a");
-  px(ctx, 108, 52, 30, 2, "#4a4c4a");
-  px(ctx, 108, 56, 30, 2, "#4a4c4a");
-  px(ctx, 116, 78, 16, 8, "#4a4c48");
-  px(ctx, 112, 84, 24, 4, "#3a3c38");
-  px(ctx, 128, 88, 2, 12, "#2a2c2e");
-  px(ctx, 133, 90, 2, 14, "#2a2c2e");
+  px(ctx, 0, 84, 160, 36, "#12141a");
 }
 
 const gfx = {
-  atlas: null,
+  scene: null,
 };
 
-const SPR = {
-  head: { x: 16, y: 50 },
-  body: { x: 16, y: 60 },
-  hands: { x: 20, y: 73 },
-  keys: { x: 14, y: 74 },
-  crt: { x: 28, y: 56 },
-};
-
-function blit(ctx, name, x, y) {
-  const atlas = gfx.atlas;
-  const spr = SPRITES[name];
-  if (!atlas || !spr) return;
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(atlas, spr.x, spr.y, spr.w, spr.h, x | 0, y | 0, spr.w, spr.h);
-}
-
-function drawFace(rankId) {
+function drawFace() {
   const ctx = faceCtx;
-  const atlas = gfx.atlas;
-  const spr = SPRITES[`face-${faceIndex(rankId)}`] || SPRITES["face-0"];
+  const img = gfx.scene;
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, 32, 32);
-  if (!atlas || !spr) return;
-  const x = (32 - spr.w) >> 1;
-  const y = (32 - spr.h) >> 1;
-  ctx.drawImage(atlas, spr.x, spr.y, spr.w, spr.h, x, y, spr.w, spr.h);
+  if (!img) return;
+  ctx.drawImage(img, FACE.x, FACE.y, FACE.w, FACE.h, 0, 0, 32, 32);
 }
 
 function loadGfx() {
@@ -188,36 +137,16 @@ function loadGfx() {
     const img = new Image();
     img.decoding = "async";
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("atlas"));
-    img.src = ATLAS_SRC;
+    img.onerror = () => reject(new Error("scene"));
+    img.src = SCENE_SRC;
   }).then(async (img) => {
     try {
       if (img.decode) await img.decode();
     } catch {
       // decode() is best-effort; onload already means the bitmap is usable
     }
-    gfx.atlas = img;
+    gfx.scene = img;
   });
-}
-
-function layerBody(ctx) {
-  blit(ctx, "head", SPR.head.x, SPR.head.y);
-  blit(ctx, "body", SPR.body.x, SPR.body.y);
-}
-
-function layerHandsKeys(ctx, press) {
-  blit(ctx, "keys", SPR.keys.x, SPR.keys.y);
-  blit(ctx, press ? "handsPress" : "hands", SPR.hands.x, SPR.hands.y);
-}
-
-function layerCrtLight(ctx, holding, flashing) {
-  if (!gfx.atlas) return;
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.globalAlpha = flashing ? 1 : holding ? 0.72 : 0.32;
-  ctx.globalCompositeOperation = "screen";
-  blit(ctx, "crt", SPR.crt.x, SPR.crt.y);
-  ctx.restore();
 }
 
 function drawScene(t, holding) {
@@ -230,14 +159,19 @@ function drawScene(t, holding) {
   }
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const press = (Math.floor(t * 10) % 2) === 1;
   layerWall(ctx);
-  layerDesk(ctx);
-  layerProps(ctx);
-  layerMonitor(ctx, holding, flashing);
-  layerBody(ctx);
-  layerHandsKeys(ctx, press);
-  layerCrtLight(ctx, holding, flashing);
+  if (gfx.scene) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(gfx.scene, 0, 0, gfx.scene.width, gfx.scene.height, 0, 0, 160, 120);
+  }
+  if (holding || flashing) {
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    ctx.globalAlpha = flashing ? 0.55 : 0.22;
+    ctx.fillStyle = "#a8d4e8";
+    ctx.fillRect(0, 0, 160, 120);
+    ctx.restore();
+  }
 }
 
 function escapeHtml(text) {
@@ -595,7 +529,7 @@ function tick(now) {
     if (state.flashAge >= FLASH_DUR) state.flashAge = -1;
   }
 
-  drawFace(state.rank);
+  drawFace();
   drawScene(state.time, state.holding && state.started && !state.paused && !state.fired);
   renderHud();
   requestAnimationFrame(tick);

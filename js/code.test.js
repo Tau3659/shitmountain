@@ -1,8 +1,8 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { highlight } from "./highlight.js";
 import { formatBugLine, loadCode, parseCode, peekIndent, planMix, setCode, takeNormal, writeSlop } from "./code.js";
 import { bugCount, loadBugs, setBugs } from "./bugs.js";
-import { ATLAS_SRC, SPRITES } from "./atlas.js";
+import { FACE, SCENE_SRC } from "./gfx.js";
 
 let failed = 0;
 let passed = 0;
@@ -16,8 +16,11 @@ function assert(cond, msg) {
   console.error("FAIL", msg);
 }
 
-assert(SPRITES.head.w === 24 && SPRITES.body.w === 28 && SPRITES["face-2"].x === 192, "atlas sprite rects");
-assert(String(ATLAS_SRC).includes("atlas.png"), "atlas url points at packed sheet");
+assert(existsSync(new URL("../img/scene.png", import.meta.url)), "upper screen uses scene.png");
+assert(!existsSync(new URL("../img/atlas.png", import.meta.url)), "old atlas is gone");
+assert(!existsSync(new URL("../img/head.png", import.meta.url)), "old body slices are gone");
+assert(String(SCENE_SRC).includes("scene.png"), "scene url");
+assert(FACE.w > 0 && FACE.h > 0, "hud face crops from scene");
 assert(bugCount() === 100, "bugs bundled at import");
 assert((await loadBugs()).length === 100, "loadBugs uses bundled config");
 assert((await loadCode()).length >= 4, "loadCode uses bundled config");
