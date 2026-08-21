@@ -1,0 +1,4 @@
+.tmp-ffmpeg/
+.DS_Store
+Thumbs.db
+*.log
