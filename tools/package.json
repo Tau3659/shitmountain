@@ -1,0 +1,10 @@
+{
+  "name": "shitmountain-optimize",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "sharp": "^0.34.2",
+    "subset-font": "^2.4.0"
+  }
+}
