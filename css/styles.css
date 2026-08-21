@@ -17,6 +17,7 @@
   --bad: #d45a4a;
   --warn: #d4b45a;
   --crt: #a8d4e8;
+  --intro-bg: #00000d;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -80,10 +81,13 @@ button {
 
 
 .stage {
+  --scene-w: 1096;
+  --scene-h: 720;
   position: relative;
-  flex: 0 0 42dvh;
-  height: 42dvh;
+  flex: 0 0 auto;
   width: 100%;
+  height: auto;
+  aspect-ratio: var(--scene-w) / var(--scene-h);
   pointer-events: none;
   overflow: hidden;
   background: var(--wall);
@@ -94,10 +98,11 @@ button {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center;
+  object-position: center top;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  background: #1a1c1e;
+  background: var(--wall);
+  pointer-events: none;
 }
 
 .hud-layer {
@@ -123,8 +128,10 @@ button {
 }
 
 #face {
+  display: block;
   width: 40px;
   height: 40px;
+  object-fit: fill;
   image-rendering: pixelated;
   background: var(--lo);
   border: 2px solid var(--edge);
@@ -188,6 +195,11 @@ button {
   padding: 6px 6px 8px;
 }
 
+.meter .lab {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .meter .lab,
 .meter #lines,
 .meter #good,
@@ -245,21 +257,6 @@ button {
   100% { color: #48d060; transform: translateY(0); }
 }
 
-.status {
-  position: absolute;
-  left: 22%;
-  top: calc(12px + var(--safe-top) + 48px);
-  font-size: 12px;
-  color: var(--warn);
-  background: var(--panel);
-  border: 2px solid var(--edge);
-  box-shadow: var(--bevel);
-  padding: 6px 8px;
-}
-
-.status.fixing { color: var(--ok); }
-.status.slop { color: var(--warn); }
-
 .monitor {
   flex: 1 1 auto;
   min-height: 0;
@@ -299,6 +296,15 @@ button {
   font-size: 12px;
   line-height: 1.2;
   color: var(--ok);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.console > div {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .scanlines {
@@ -332,13 +338,84 @@ button {
   display: none !important;
 }
 
-.intro-copy {
-  margin: 0;
-  font-size: 12px;
-  background: var(--panel);
-  border: 2px solid var(--edge);
-  box-shadow: var(--bevel), var(--bevel-out);
-  padding: 16px 18px;
+.overlay.intro {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: var(--intro-bg);
+  padding: 0;
+}
+
+.intro-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center top;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: var(--intro-bg);
+}
+
+.intro-ui {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2% 0 calc(12px + var(--safe-bottom));
+  background: var(--intro-bg);
+}
+
+.intro-stack {
+  width: 86%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro-title {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  mix-blend-mode: screen;
+}
+
+.intro-start {
+  display: block;
+  margin: 5% 0 0;
+  padding: 0;
+  border: 0;
+  width: 55.029296875%;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.intro-start img {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.intro-hint {
+  display: block;
+  width: 69.62890625%;
+  height: auto;
+  margin-top: 5%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  mix-blend-mode: screen;
 }
 
 .sheet-card {
@@ -444,6 +521,3 @@ button {
 @media (orientation: landscape) and (max-height: 500px) {
   .rotate-hint { display: flex; }
 }
-
-body.is-fixing .status { color: var(--ok); }
-body.is-slop .status { color: var(--warn); }

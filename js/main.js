@@ -125,11 +125,17 @@ function pick(pool) {
   return pool[(Math.random() * pool.length) | 0];
 }
 
+function rollErrorGap() {
+  const r = rank();
+  const mean = Math.max(2, r.linesPerSec / r.bugsPerSec);
+  const u = Math.max(1e-6, Math.random());
+  const gap = Math.round(-Math.log(u) * mean);
+  return Math.max(1, Math.min(Math.round(mean * 5), gap));
+}
+
 const el = {
   app: document.getElementById("app"),
-  face: document.getElementById("face"),
   rank: document.getElementById("rank-name"),
-  status: document.getElementById("status"),
   clockOut: document.getElementById("clock-out"),
   lines: document.getElementById("lines"),
   good: document.getElementById("good"),
@@ -137,6 +143,7 @@ const el = {
   bugsWrap: document.getElementById("bugs-wrap"),
   goodWrap: document.getElementById("good-wrap"),
   scene: document.getElementById("scene"),
+  stage: document.querySelector(".stage"),
   cons: document.getElementById("console"),
   intro: document.getElementById("intro"),
   sheet: document.getElementById("sheet"),
@@ -150,13 +157,7 @@ const el = {
   sumGood: document.getElementById("sum-good"),
 };
 
-const faceCtx = el.face.getContext("2d");
-const sceneCtx = el.scene.getContext("2d");
-faceCtx.imageSmoothingEnabled = false;
-sceneCtx.imageSmoothingEnabled = false;
-
 const TAP_FOCUS = 0.6;
-const FLASH_DUR = 0.16;
 
 const state = {
   started: false,
@@ -170,167 +171,52 @@ const state = {
   time: 0,
   last: 0,
   focusUntil: 0,
-  flashAge: -1,
   lastBugShown: 0,
   lastGoodShown: 0,
+  linesUntilError: 1,
 };
 
 function rank() {
   return RANKS[state.rank];
 }
 
-function px(ctx, x, y, w, h, color) {
-  ctx.fillStyle = color;
-  ctx.fillRect(x | 0, y | 0, w | 0, h | 0);
+function fitScene() {
+  const video = el.scene;
+  if (!video || !el.stage || !video.videoWidth || !video.videoHeight) return;
+  el.stage.style.setProperty("--scene-w", String(video.videoWidth));
+  el.stage.style.setProperty("--scene-h", String(video.videoHeight));
 }
 
-function dither(ctx, x, y, w, h, a, b) {
-  px(ctx, x, y, w, h, a);
-  ctx.fillStyle = b;
-  for (let j = 0; j < h; j += 2) {
-    const odd = (j >> 1) & 1;
-    for (let i = odd; i < w; i += 2) {
-      ctx.fillRect(x + i, y + j, 1, 1);
-    }
+function syncVideo() {
+  const video = el.scene;
+  if (!video) return;
+  video.muted = !state.started || state.paused;
+  if (state.paused) {
+    video.pause();
+    return;
   }
+  const play = video.play();
+  if (play) play.catch(() => {});
 }
 
-function layerWall(ctx) {
-  dither(ctx, 0, 0, 160, 84, "#1a1c1e", "#12141a");
+function logCapacity() {
+  const box = el.cons;
+  if (!box) return 24;
+  const styles = getComputedStyle(box);
+  const pad = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+  const line = parseFloat(styles.lineHeight) || 14.4;
+  const inner = box.clientHeight - pad;
+  return Math.max(1, Math.floor(inner / line));
 }
 
-function layerDesk(ctx) {
-  px(ctx, 0, 84, 160, 36, "#2a2624");
-  px(ctx, 0, 84, 160, 6, "#3c3834");
-  px(ctx, 0, 84, 160, 1, "#4a4640");
-  px(ctx, 0, 90, 160, 1, "#1a1816");
-}
-
-function layerProps(ctx) {
-  px(ctx, 2, 76, 10, 8, "#d0d4d8");
-  px(ctx, 3, 74, 8, 3, "#8b9094");
-  px(ctx, 3, 78, 8, 1, "#7a7e82");
-  px(ctx, 2, 68, 7, 7, "#4a4e52");
-  px(ctx, 3, 66, 5, 3, "#3a3c40");
-  px(ctx, 4, 64, 3, 3, "#d0d4d8");
-}
-
-function layerMonitor(ctx, holding, flashing) {
-  const leak = flashing ? "#e8f4f8" : holding ? "#a8d4e8" : "#5a7a88";
-  px(ctx, 94, 38, 4, 36, leak);
-  if (flashing) px(ctx, 92, 42, 3, 26, "#c8e4f0");
-  px(ctx, 98, 30, 50, 54, "#6a6e68");
-  px(ctx, 100, 32, 46, 48, "#3a3c3a");
-  px(ctx, 104, 36, 38, 8, "#2a2c2a");
-  px(ctx, 108, 48, 30, 2, "#4a4c4a");
-  px(ctx, 108, 52, 30, 2, "#4a4c4a");
-  px(ctx, 108, 56, 30, 2, "#4a4c4a");
-  px(ctx, 116, 78, 16, 8, "#4a4c48");
-  px(ctx, 112, 84, 24, 4, "#3a3c38");
-  px(ctx, 128, 88, 2, 12, "#2a2c2e");
-  px(ctx, 133, 90, 2, 14, "#2a2c2e");
-}
-
-const gfx = {
-  head: null,
-  body: null,
-  hands: null,
-  handsPress: null,
-  keys: null,
-  crt: null,
-  faces: [null, null, null],
-};
-
-const SPR = {
-  head: { x: 16, y: 51 },
-  body: { x: 16, y: 60 },
-  hands: { x: 20, y: 73 },
-  keys: { x: 14, y: 74 },
-  crt: { x: 36, y: 64 },
-};
-
-function blit(ctx, img, x, y) {
-  if (!img) return;
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, x | 0, y | 0);
-}
-
-function drawFace(rankId) {
-  const ctx = faceCtx;
-  ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, 32, 32);
-  const img = gfx.faces[rankId] || gfx.faces[0];
-  if (!img) return;
-  const x = (32 - img.width) >> 1;
-  const y = (32 - img.height) >> 1;
-  ctx.drawImage(img, x, y);
-}
-
-function loadGfx() {
-  const names = ["head", "body", "hands", "hands-press", "keys", "crt", "face-0", "face-1", "face-2"];
-  return Promise.all(names.map((name) => new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve([name, img]);
-    img.onerror = () => reject(new Error(name));
-    img.src = `img/${name}.png`;
-  }))).then((pairs) => {
-    for (const [name, img] of pairs) {
-      if (name.startsWith("face-")) gfx.faces[Number(name.slice(5))] = img;
-      else if (name === "hands-press") gfx.handsPress = img;
-      else gfx[name] = img;
-    }
-  });
-}
-
-function layerBody(ctx) {
-  blit(ctx, gfx.head, SPR.head.x, SPR.head.y);
-  blit(ctx, gfx.body, SPR.body.x, SPR.body.y);
-}
-
-function layerHandsKeys(ctx, press) {
-  blit(ctx, gfx.keys, SPR.keys.x, SPR.keys.y);
-  blit(ctx, press ? gfx.handsPress : gfx.hands, SPR.hands.x, SPR.hands.y);
-}
-
-function layerCrtLight(ctx, holding, flashing) {
-  if (!gfx.crt) return;
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.globalCompositeOperation = "screen";
-  ctx.globalAlpha = flashing ? 1 : holding ? 0.7 : 0.28;
-  blit(ctx, gfx.crt, SPR.crt.x, SPR.crt.y);
-  if (flashing) {
-    blit(ctx, gfx.crt, SPR.hands.x + 4, SPR.hands.y - 2);
-    ctx.globalAlpha = 1;
-    px(ctx, 38, 63, 2, 2, "#e8f4f8");
-    px(ctx, 40, 65, 3, 2, "#a8d4e8");
-  }
-  ctx.restore();
-}
-
-function drawScene(t, holding, rankId) {
-  const canvas = el.scene;
-  const ctx = sceneCtx;
-  if (canvas.width !== 160 || canvas.height !== 120) {
-    canvas.width = 160;
-    canvas.height = 120;
-    ctx.imageSmoothingEnabled = false;
-  }
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const flashing = state.flashAge >= 0 && state.flashAge < FLASH_DUR;
-  const press = holding || flashing;
-  layerWall(ctx);
-  layerDesk(ctx);
-  layerProps(ctx);
-  layerMonitor(ctx, holding, flashing);
-  layerBody(ctx);
-  layerHandsKeys(ctx, press);
-  layerCrtLight(ctx, holding, flashing);
+function trimLog() {
+  const cap = logCapacity();
+  if (state.log.length > cap) state.log.splice(0, state.log.length - cap);
 }
 
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 24) state.log.shift();
+  trimLog();
   renderLog();
 }
 
@@ -338,7 +224,6 @@ function renderLog() {
   el.cons.innerHTML = state.log
     .map((row) => `<div class="${row.kind}">${row.text}</div>`)
     .join("");
-  el.cons.scrollTop = el.cons.scrollHeight;
 }
 
 function hopBugMeter() {
@@ -370,28 +255,22 @@ function renderHud() {
   state.lastBugShown = bugs;
   if (goods < state.lastGoodShown) hurtGoodMeter();
   state.lastGoodShown = goods;
-  const fixing = state.holding;
-  const clean = fixing && Math.floor(state.bugs) <= 0;
-  el.status.textContent = !fixing ? "写屎山" : clean ? "写对的" : "改 Bug";
-  el.status.classList.toggle("fixing", fixing);
-  el.status.classList.toggle("slop", !fixing);
-  document.body.classList.toggle("is-fixing", fixing);
-  document.body.classList.toggle("is-slop", !fixing);
 }
 
 function poke() {
   if (state.paused || !state.started) return;
   state.focusUntil = state.time + TAP_FOCUS;
   state.holding = true;
-  state.flashAge = 0;
   renderHud();
 }
 
 function startGame() {
   if (state.started) return;
   state.started = true;
+  state.linesUntilError = rollErrorGap();
   el.intro.classList.add("hidden");
   pushLog("// 开工", "dim");
+  syncVideo();
 }
 
 function openSheet(finalQuit) {
@@ -426,6 +305,7 @@ function openSheet(finalQuit) {
     el.actions.append(again);
   }
   el.sheet.classList.remove("hidden");
+  syncVideo();
   renderHud();
 }
 
@@ -434,6 +314,7 @@ function promote() {
   state.paused = false;
   el.sheet.classList.add("hidden");
   pushLog(`// 晋升 ${rank().name}，手速加快`, "ok");
+  syncVideo();
   renderHud();
 }
 
@@ -447,12 +328,14 @@ function resetRun() {
   state.bugs = 0;
   state.log = [];
   state.focusUntil = 0;
-  state.flashAge = -1;
   state.lastBugShown = 0;
   state.lastGoodShown = 0;
+  state.linesUntilError = rollErrorGap();
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
+  if (el.scene) el.scene.currentTime = 0;
   renderLog();
+  syncVideo();
   renderHud();
 }
 
@@ -494,30 +377,26 @@ function tick(now) {
     } else {
       const prevL = state.lines;
       const prevB = state.bugs;
-      const prevG = state.goodLines;
       state.lines += r.linesPerSec * dt;
       state.bugs += r.bugsPerSec * dt;
       const newBugs = Math.floor(state.bugs) - Math.floor(prevB);
       if (newBugs > 0) {
         state.goodLines = Math.max(0, state.goodLines - newBugs);
-        for (let i = 0; i < newBugs; i += 1) {
-          pushLog(pick(ERR_LINES), "err");
-        }
       }
-      if (Math.floor(state.lines) > Math.floor(prevL)) {
-        pushLog(pick(SLOP_LINES), "dim");
+      const newLines = Math.floor(state.lines) - Math.floor(prevL);
+      for (let i = 0; i < newLines; i += 1) {
+        state.linesUntilError -= 1;
+        if (state.linesUntilError <= 0) {
+          pushLog(pick(ERR_LINES), "err");
+          state.linesUntilError = rollErrorGap();
+        } else {
+          pushLog(pick(SLOP_LINES), "dim");
+        }
       }
       state.goodLines = Math.max(0, state.goodLines);
     }
   }
 
-  if (state.flashAge >= 0) {
-    state.flashAge += dt;
-    if (state.flashAge >= FLASH_DUR) state.flashAge = -1;
-  }
-
-  drawFace(state.rank);
-  drawScene(state.time, state.holding && state.started && !state.paused, state.rank, state.bugs);
   renderHud();
   requestAnimationFrame(tick);
 }
@@ -556,9 +435,20 @@ window.addEventListener("keydown", (ev) => {
   poke();
 });
 
+window.addEventListener("resize", () => {
+  trimLog();
+  renderLog();
+});
+
 renderHud();
 state.last = performance.now();
-loadGfx().then(() => requestAnimationFrame(tick)).catch((err) => {
-  console.error(err);
-  requestAnimationFrame(tick);
-});
+if (el.scene) {
+  el.scene.playsInline = true;
+  el.scene.addEventListener("loadedmetadata", fitScene);
+  el.scene.addEventListener("canplay", () => {
+    fitScene();
+    syncVideo();
+  });
+}
+syncVideo();
+requestAnimationFrame(tick);
