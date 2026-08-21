@@ -190,13 +190,24 @@ function fitScene() {
 function syncVideo() {
   const video = el.scene;
   if (!video) return;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.playsInline = true;
   video.muted = !state.started || state.paused;
   if (state.paused) {
     video.pause();
     return;
   }
+  if (!state.started) return;
   const play = video.play();
-  if (play) play.catch(() => {});
+  if (play) {
+    play.catch(() => {
+      video.muted = true;
+      video.play().then(() => {
+        if (state.started && !state.paused) video.muted = false;
+      }).catch(() => {});
+    });
+  }
 }
 
 function logCapacity() {
@@ -444,11 +455,15 @@ renderHud();
 state.last = performance.now();
 if (el.scene) {
   el.scene.playsInline = true;
+  el.scene.setAttribute("playsinline", "");
+  el.scene.setAttribute("webkit-playsinline", "");
   el.scene.addEventListener("loadedmetadata", fitScene);
   el.scene.addEventListener("canplay", () => {
     fitScene();
     syncVideo();
   });
+  el.scene.addEventListener("playing", () => {
+    if (state.started && !state.paused) el.scene.muted = false;
+  });
 }
-syncVideo();
 requestAnimationFrame(tick);

@@ -7,16 +7,21 @@
   <meta name="theme-color" content="#12141a" />
   <title>屎山</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <link rel="preload" href="assets/intro-scene.webp" as="image" />
 </head>
 <body>
   <div id="app">
     <div class="stage">
       <video
         id="scene"
-        src="video/像素风格人物设计 (1).mp4"
+        src="video/scene.mp4"
         loop
+        muted
         playsinline
         webkit-playsinline
+        x5-playsinline
+        x5-video-player-type="h5"
+        x5-video-player-fullscreen="false"
         preload="auto"
         disablepictureinpicture
         aria-hidden="true"
@@ -24,7 +29,7 @@
       <div class="hud-layer">
         <header class="hud" aria-live="polite">
           <div class="rank-block">
-            <img id="face" src="img/face.png?v=2" width="32" height="32" alt="" draggable="false" />
+            <img id="face" src="img/face.webp" width="32" height="32" alt="" draggable="false" />
             <div class="rank-name" id="rank-name">初级</div>
           </div>
           <button type="button" id="clock-out" class="clock-out">收工</button>
@@ -47,14 +52,14 @@
   </div>
 
   <div id="intro" class="overlay intro">
-    <img class="intro-scene" src="assets/intro-scene.png" alt="" draggable="false" />
+    <img class="intro-scene" src="assets/intro-scene.webp" alt="" draggable="false" fetchpriority="high" />
     <div class="intro-ui">
       <div class="intro-stack">
-        <img class="intro-title" src="assets/intro-title.png" alt="SHITMOUNTAIN CODE" draggable="false" />
+        <img class="intro-title" src="assets/intro-title.webp" alt="SHITMOUNTAIN CODE" draggable="false" />
         <button type="button" id="intro-start" class="intro-start" aria-label="START CODING">
-          <img src="assets/intro-start.png" alt="" draggable="false" />
+          <img src="assets/intro-start.webp" alt="" draggable="false" />
         </button>
-        <img class="intro-hint" src="assets/intro-hint.png" alt="TAP SCREEN TO FIX BUGS" draggable="false" />
+        <img class="intro-hint" src="assets/intro-hint.webp" alt="TAP SCREEN TO FIX BUGS" draggable="false" />
       </div>
     </div>
   </div>
