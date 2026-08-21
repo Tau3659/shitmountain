@@ -1,8 +1,33 @@
-const RANKS = [
-  { id: 0, name: "初级", linesPerSec: 8, bugsPerSec: 1.1, fixPerSec: 2.4 },
-  { id: 1, name: "中级", linesPerSec: 14, bugsPerSec: 2.0, fixPerSec: 4.2 },
-  { id: 2, name: "资深", linesPerSec: 22, bugsPerSec: 3.4, fixPerSec: 6.6 },
-];
+function rung(name, linesPerSec, bugsPerSec, fixPerSec, goodToUp, bugsToDown) {
+  return { name, linesPerSec, bugsPerSec, fixPerSec, goodToUp, bugsToDown };
+}
+
+const TRACKS = {
+  good: [
+    rung("实习生", 6, 0.9, 2.0, 40, 35),
+    rung("初级", 8, 1.1, 2.4, 100, 80),
+    rung("中级", 11, 1.4, 3.2, 250, 180),
+    rung("高级", 15, 1.8, 4.2, 600, 400),
+    rung("资深", 20, 2.3, 5.5, 1500, 900),
+    rung("专家", 26, 2.9, 7.2, 4000, 2000),
+    rung("架构师", 34, 3.7, 9.4, 10000, 4500),
+    rung("技术总监", 44, 4.7, 12, 25000, 10000),
+    rung("首席架构", 56, 6.0, 15, 60000, 22000),
+    rung("技术合伙人", 72, 7.6, 19, null, 50000),
+  ],
+  bad: [
+    rung("背锅侠", 10, 1.6, 2.2, 80, 50),
+    rung("人肉补丁", 14, 2.3, 2.0, 200, 120),
+    rung("救火队员", 19, 3.3, 1.8, 500, 280),
+    rung("Bug体质", 26, 4.8, 1.6, 1200, 650),
+    rung("屎山民工", 35, 7.0, 1.4, 3000, 1500),
+    rung("祖传看守", 47, 10, 1.2, 8000, 3500),
+    rung("事故本体", 63, 15, 1.0, 20000, 8000),
+    rung("删不掉的", 84, 22, 0.8, 50000, 18000),
+    rung("系统债主", 110, 32, 0.6, 120000, 40000),
+    rung("屎山化石", 150, 46, 0.4, 300000, null),
+  ],
+};
 
 const SLOP_LINES = [
   "function foo() { return foo() }",
@@ -154,6 +179,11 @@ const el = {
   actions: document.getElementById("sheet-actions"),
   sumRank: document.getElementById("sum-rank"),
   sumNext: document.getElementById("sum-next"),
+  sumPrev: document.getElementById("sum-prev"),
+  sumTrack: document.getElementById("sum-track"),
+  sumNeedGood: document.getElementById("sum-need-good"),
+  sumNeedBugs: document.getElementById("sum-need-bugs"),
+  sheetHint: document.getElementById("sheet-hint"),
   sumGood: document.getElementById("sum-good"),
 };
 
@@ -164,6 +194,7 @@ const state = {
   holding: false,
   paused: false,
   rank: 0,
+  track: "good",
   lines: 0,
   goodLines: 0,
   bugs: 0,
@@ -177,7 +208,56 @@ const state = {
 };
 
 function rank() {
-  return RANKS[state.rank];
+  return TRACKS[state.track][state.rank];
+}
+
+function peekTitle(dir) {
+  if (dir === "up") {
+    if (state.track === "good") {
+      return state.rank < 9 ? TRACKS.good[state.rank + 1].name : "满级";
+    }
+    return state.rank === 0 ? TRACKS.good[0].name : TRACKS.bad[state.rank - 1].name;
+  }
+  if (state.track === "bad") {
+    return state.rank < 9 ? TRACKS.bad[state.rank + 1].name : "已经沉底";
+  }
+  return state.rank === 0 ? TRACKS.bad[0].name : TRACKS.good[state.rank - 1].name;
+}
+
+function canPromote() {
+  const need = rank().goodToUp;
+  return need != null && Math.floor(state.goodLines) >= need;
+}
+
+function mustDemote() {
+  const need = rank().bugsToDown;
+  return need != null && Math.floor(state.bugs) >= need;
+}
+
+function moveRank(dir) {
+  if (dir === "up") {
+    if (state.track === "bad") {
+      if (state.rank === 0) {
+        state.track = "good";
+        state.rank = 0;
+      } else {
+        state.rank -= 1;
+      }
+    } else if (state.rank < 9) {
+      state.rank += 1;
+    }
+    return;
+  }
+  if (state.track === "good") {
+    if (state.rank === 0) {
+      state.track = "bad";
+      state.rank = 0;
+    } else {
+      state.rank -= 1;
+    }
+  } else if (state.rank < 9) {
+    state.rank += 1;
+  }
 }
 
 function fitScene() {
@@ -190,24 +270,28 @@ function fitScene() {
 function syncVideo() {
   const video = el.scene;
   if (!video) return;
+  video.playsInline = true;
   video.setAttribute("playsinline", "");
   video.setAttribute("webkit-playsinline", "");
-  video.playsInline = true;
-  video.muted = !state.started || state.paused;
   if (state.paused) {
     video.pause();
     return;
   }
-  if (!state.started) return;
+  video.muted = !state.started;
   const play = video.play();
   if (play) {
     play.catch(() => {
       video.muted = true;
-      video.play().then(() => {
-        if (state.started && !state.paused) video.muted = false;
-      }).catch(() => {});
+      video.play().catch(() => {});
     });
   }
+}
+
+function unmuteVideo() {
+  const video = el.scene;
+  if (!video) return;
+  video.muted = false;
+  if (video.paused) syncVideo();
 }
 
 function logCapacity() {
@@ -225,10 +309,10 @@ function trimLog() {
   if (state.log.length > cap) state.log.splice(0, state.log.length - cap);
 }
 
-function pushLog(text, kind) {
+function pushLog(text, kind, skipRender) {
   state.log.push({ text, kind });
   trimLog();
-  renderLog();
+  if (!skipRender) renderLog();
 }
 
 function renderLog() {
@@ -278,10 +362,10 @@ function poke() {
 function startGame() {
   if (state.started) return;
   state.started = true;
+  unmuteVideo();
   state.linesUntilError = rollErrorGap();
   el.intro.classList.add("hidden");
   pushLog("// 开工", "dim");
-  syncVideo();
 }
 
 function openSheet(finalQuit) {
@@ -290,24 +374,55 @@ function openSheet(finalQuit) {
   state.focusUntil = 0;
   const lines = Math.floor(state.lines);
   const bugs = Math.floor(state.bugs);
+  const good = Math.floor(state.goodLines);
+  const r = rank();
   el.sumLines.textContent = String(lines);
-  el.sumGood.textContent = String(Math.floor(state.goodLines));
+  el.sumGood.textContent = String(good);
   el.sumBugs.textContent = String(bugs);
-  el.sumRank.textContent = rank().name;
-  const nxt = RANKS[state.rank + 1];
-  el.sumNext.textContent = nxt ? nxt.name : "满级";
+  el.sumRank.textContent = r.name;
+  el.sumTrack.textContent = state.track === "good" ? "正轨" : "屎山轨";
+  el.sumNext.textContent = peekTitle("up");
+  el.sumPrev.textContent = peekTitle("down");
+  el.sumNeedGood.textContent = r.goodToUp == null ? "—" : String(r.goodToUp);
+  el.sumNeedBugs.textContent = r.bugsToDown == null ? "—" : String(r.bugsToDown);
   el.stamp.classList.toggle("hidden", bugs !== 0);
-  el.sheetTitle.textContent = finalQuit ? "下班" : "收工";
+  const demote = mustDemote();
+  const promo = canPromote();
+  el.sheetTitle.textContent = finalQuit ? "下班" : demote ? "绩效翻车" : promo ? "绩效达标" : "收工";
+  if (el.sheetHint) {
+    if (finalQuit) el.sheetHint.textContent = "";
+    else if (demote) el.sheetHint.textContent = `Bug ${bugs} ≥ ${r.bugsToDown}，下一档是 ${peekTitle("down")}`;
+    else if (promo) el.sheetHint.textContent = `正确 ${good} ≥ ${r.goodToUp}，可去 ${peekTitle("up")}`;
+    else {
+      const needG = r.goodToUp == null ? "已满级" : `正确还差 ${Math.max(0, r.goodToUp - good)}`;
+      const needB = r.bugsToDown == null ? "已沉底" : `Bug 距降级 ${Math.max(0, r.bugsToDown - bugs)}`;
+      el.sheetHint.textContent = `${needG}；${needB}`;
+    }
+  }
   el.actions.innerHTML = "";
-  if (!finalQuit && state.rank < RANKS.length - 1) {
-    const up = document.createElement("button");
-    up.className = "primary";
-    up.textContent = "晋升";
-    up.addEventListener("click", promote);
+  if (!finalQuit) {
+    if (demote) {
+      const down = document.createElement("button");
+      down.className = "danger";
+      down.textContent = "降级";
+      down.addEventListener("click", demoteRank);
+      el.actions.append(down);
+    } else if (promo) {
+      const up = document.createElement("button");
+      up.className = "primary";
+      up.textContent = "晋升";
+      up.addEventListener("click", promote);
+      el.actions.append(up);
+    }
+    const keep = document.createElement("button");
+    if (!demote && !promo) keep.className = "primary";
+    keep.textContent = "继续";
+    keep.addEventListener("click", continueWork);
+    el.actions.append(keep);
     const bye = document.createElement("button");
     bye.textContent = "下班";
     bye.addEventListener("click", () => openSheet(true));
-    el.actions.append(up, bye);
+    el.actions.append(bye);
   } else {
     const again = document.createElement("button");
     again.className = "primary";
@@ -320,11 +435,31 @@ function openSheet(finalQuit) {
   renderHud();
 }
 
-function promote() {
-  if (state.rank < RANKS.length - 1) state.rank += 1;
+function continueWork() {
   state.paused = false;
   el.sheet.classList.add("hidden");
-  pushLog(`// 晋升 ${rank().name}，手速加快`, "ok");
+  syncVideo();
+  renderHud();
+}
+
+function promote() {
+  if (!canPromote() || mustDemote()) return;
+  moveRank("up");
+  state.paused = false;
+  el.sheet.classList.add("hidden");
+  const rail = state.track === "good" ? "正轨" : "屎山轨";
+  pushLog(`// 晋升 ${rail}·${rank().name}`, "ok");
+  syncVideo();
+  renderHud();
+}
+
+function demoteRank() {
+  if (!mustDemote()) return;
+  moveRank("down");
+  state.paused = false;
+  el.sheet.classList.add("hidden");
+  const rail = state.track === "good" ? "正轨" : "屎山轨";
+  pushLog(`// 降级 ${rail}·${rank().name}`, "err");
   syncVideo();
   renderHud();
 }
@@ -334,6 +469,7 @@ function resetRun() {
   state.holding = false;
   state.paused = false;
   state.rank = 0;
+  state.track = "good";
   state.lines = 0;
   state.goodLines = 0;
   state.bugs = 0;
@@ -365,8 +501,9 @@ function tick(now) {
         const dropped = Math.floor(before) - Math.floor(state.bugs);
         if (dropped > 0) {
           for (let i = 0; i < dropped; i += 1) {
-            pushLog(`fixed  ${pick(ERR_LINES)}`, "ok");
+            pushLog(`fixed  ${pick(ERR_LINES)}`, "ok", true);
           }
+          renderLog();
         }
       }
       if (state.bugs <= 0 && state.lines >= 1) {
@@ -381,8 +518,9 @@ function tick(now) {
         if (gained > 0) {
           state.lines = Math.max(0, state.lines - gained);
           for (let i = 0; i < gained; i += 1) {
-            pushLog(pick(GOOD_LINES), "ok");
+            pushLog(pick(GOOD_LINES), "ok", true);
           }
+          renderLog();
         }
       }
     } else {
@@ -395,14 +533,17 @@ function tick(now) {
         state.goodLines = Math.max(0, state.goodLines - newBugs);
       }
       const newLines = Math.floor(state.lines) - Math.floor(prevL);
-      for (let i = 0; i < newLines; i += 1) {
-        state.linesUntilError -= 1;
-        if (state.linesUntilError <= 0) {
-          pushLog(pick(ERR_LINES), "err");
-          state.linesUntilError = rollErrorGap();
-        } else {
-          pushLog(pick(SLOP_LINES), "dim");
+      if (newLines > 0) {
+        for (let i = 0; i < newLines; i += 1) {
+          state.linesUntilError -= 1;
+          if (state.linesUntilError <= 0) {
+            pushLog(pick(ERR_LINES), "err", true);
+            state.linesUntilError = rollErrorGap();
+          } else {
+            pushLog(pick(SLOP_LINES), "dim", true);
+          }
         }
+        renderLog();
       }
       state.goodLines = Math.max(0, state.goodLines);
     }
@@ -454,16 +595,20 @@ window.addEventListener("resize", () => {
 renderHud();
 state.last = performance.now();
 if (el.scene) {
-  el.scene.playsInline = true;
-  el.scene.setAttribute("playsinline", "");
-  el.scene.setAttribute("webkit-playsinline", "");
-  el.scene.addEventListener("loadedmetadata", fitScene);
-  el.scene.addEventListener("canplay", () => {
+  const video = el.scene;
+  video.playsInline = true;
+  video.muted = true;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.addEventListener("loadedmetadata", fitScene);
+  video.addEventListener("canplay", () => {
     fitScene();
-    syncVideo();
+    if (!state.paused) syncVideo();
   });
-  el.scene.addEventListener("playing", () => {
-    if (state.started && !state.paused) el.scene.muted = false;
+  video.addEventListener("timeupdate", () => {
+    if (!video.duration || video.paused) return;
+    if (video.duration - video.currentTime < 0.08) video.currentTime = 0.05;
   });
+  syncVideo();
 }
 requestAnimationFrame(tick);

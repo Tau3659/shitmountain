@@ -17,6 +17,7 @@
   --bad: #d45a4a;
   --warn: #d4b45a;
   --crt: #a8d4e8;
+  --danger-bg: #3a1c1c;
   --intro-bg: #00000d;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -99,10 +100,9 @@ button {
   height: 100%;
   object-fit: contain;
   object-position: center top;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
   background: var(--wall);
   pointer-events: none;
+  transform: translateZ(0);
 }
 
 .hud-layer {
@@ -143,7 +143,9 @@ button {
   align-items: center;
   padding: 0 10px;
   min-height: 40px;
+  max-width: 8.5em;
   font-size: 12px;
+  line-height: 1.2;
   color: var(--text);
   background: var(--panel);
   border: 2px solid var(--edge);
@@ -420,6 +422,8 @@ button {
 
 .sheet-card {
   width: min(20rem, 100%);
+  max-height: 90dvh;
+  overflow: auto;
   background: var(--panel);
   border: 2px solid var(--edge);
   box-shadow: var(--bevel), var(--bevel-out);
@@ -480,6 +484,7 @@ button {
 .sheet-actions {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
 }
@@ -497,10 +502,24 @@ button {
   cursor: pointer;
 }
 
+.sheet-hint {
+  margin: 8px 0 0;
+  min-height: 1.2em;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .sheet-actions button.primary {
   background: #1a3a20;
   color: var(--ok);
   border-color: var(--ok);
+}
+
+.sheet-actions button.danger {
+  background: var(--danger-bg);
+  color: var(--bad);
+  border-color: var(--bad);
 }
 
 .sheet-actions button:active {
