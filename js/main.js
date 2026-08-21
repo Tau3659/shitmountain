@@ -29,125 +29,29 @@ const TRACKS = {
   ],
 };
 
-const SLOP_LINES = [
-  "function foo() { return foo() }",
-  "const x = x ?? x ?? x",
-  "if (true) if (true) if (true) {}",
-  "eval(userInput) // 没事的",
-  "copy(); paste(); copy(); paste();",
-  "git push --force origin main",
-  "TODO: 以后再改",
-  "catch (e) { /* ignore */ }",
-  "setInterval(run, 1)",
-  "document.write(innerHTML)",
-  "let a = 1; a = a = a",
-  "while (true) console.log('ok')",
-  "undefined.doThing()",
-  "password = '123456'",
-  "new Array(999999).fill(0)",
-  "// 临时方案 2019",
-  "fix fix fix asdf",
-  "export default null",
-  "await fetch('/api').then(r => r) // 没处理",
-  "if (data) if (data.data) if (data.data.data) use(data.data.data.item)",
-  "JSON.parse(localStorage.user) // 可能炸",
-  "setTimeout(save, 0); setTimeout(save, 0); setTimeout(save, 0)",
-  "return res.data.data.data.list || res || []",
-  "obj['__proto__'] = obj",
-  "for (var i = 0; i < 10; i++) { i = 0 }",
-  "console.log('debug', secretKey, token, pwd)",
-  "window.location = userUrl",
-  "document.cookie = 'admin=1; path=/'",
-  "Number(undefined) + Number(null) * '2'",
-  "try { risky() } finally { risky() }",
-  "new Date(userDate).getTime() || Date.now() || 0 || 1",
-  "arr[-1] = '垫一下'",
-  "Promise.resolve().then(() => Promise.resolve().then(loop))",
-  "cssText += 'position:fixed;' // 先顶上去",
-  "innerHTML = comment + userName",
-  "Math.random() * 0 // 够随机了",
-  "if (count == '0') count = 0; else count = count",
-  "export const API = 'http://10.0.0.3:8080'",
-  "void function(){ arguments.callee() }()",
-  "let lock = false; lock = !lock; lock = !lock",
-  "switch (type) { default: break; default: break }",
-  "fs.writeFileSync('/tmp/prod.json', JSON.stringify(state))",
-  "user.age = user.age || user.Age || user.AGE || 18",
-  "parseInt('08') + parseInt('09')",
-  "typeof NaN === 'number' && NaN == NaN",
-  "btn.onclick = btn.onclick = btn.onclick = save",
-  "// 线上先这样，周五再清",
-  "throw '别问，问就是历史包袱'",
-  "merge(a, merge(a, merge(a, b)))",
-  "cache[key] = cache[key] || cache[key] || uncached()",
-  "id = id || ids[0] || ids[ids.length] || 'id'",
-  "sleep(5000) // 等接口自己好",
-];
-
-const GOOD_LINES = [
-  "const total = items.reduce((s, n) => s + n, 0)",
-  "if (!node) return null",
-  "el.addEventListener('click', onTap)",
-  "return { ok: true, data }",
-  "const next = Math.max(0, n - 1)",
-  "try { await load() } catch (e) { log(e) }",
-  "export function clamp(v, a, b)",
-  "query.selectAll('.bug').forEach(fix)",
-  "const safe = Number.isFinite(n) ? n : 0",
-  "if (!res.ok) throw new Error(res.statusText)",
-  "return structuredClone(state)",
-  "el.setAttribute('aria-live', 'polite')",
-  "const key = encodeURIComponent(raw)",
-  "await mutex.runExclusive(write)",
-  "if (signal.aborted) return",
-  "const id = crypto.randomUUID()",
-  "return lines.filter((row) => row.trim())",
-  "const url = new URL(path, origin)",
-  "queueMicrotask(() => flush())",
-  "map.set(id, Object.freeze(item))",
-  "for (const row of rows) yield transform(row)",
-  "const html = escape(text)",
-  "db.prepare('SELECT * FROM bugs WHERE id = ?').get(id)",
-  "requestAnimationFrame(tick)",
-  "const left = Math.max(0, budget - used)",
-  "headers.set('Content-Type', 'application/json')",
-  "if (bugs === 0) return rewrite(lines)",
-  "test('clamp', () => expect(clamp(-1, 0, 1)).toBe(0))",
-];
-
-const ERR_LINES = [
-  "TypeError: Cannot read properties of undefined",
-  "ReferenceError: bug is not defined",
-  "FATAL: 屎山局部坍塌",
-  "Error: expected {, saw 💩",
-  "UnhandledPromiseRejection: 又双叒崩了",
-  "SyntaxError: Unexpected token ; ; ;",
-  "RangeError: Maximum call stack size exceeded",
-  "Warning: 这段代码有自己的想法",
-  "Error: ECONNRESET prod-db 被谁 rm 了",
-  "TypeError: foo is not a function, foo is foo",
-  "FATAL: git 拒绝覆盖同事的周末",
-  "Error: Cannot find module './utils/utils/utils'",
-  "Warning: setState on unmounted 情绪",
-  "SyntaxError: Unexpected end of JSON in 注释里",
-  "Error: 401 但本地 token 还活着",
-  "RangeError: Invalid array length 999999999",
-  "TypeError: Assignment to constant 临时变量",
-  "Error: timeout of 0ms exceeded",
-  "Warning: 循环依赖把自己 import 进来了",
-  "FATAL: 构建过了，人没过",
-  "Error: ENOENT /the/file/we/swore/was-there.js",
-  "Unhandled: then() 里又 then() 里又 then()",
-  "Error: CORS 把锅甩给前端",
-  "Warning: memory leak 从 2019 活到现在",
-  "SyntaxError: missing ) after 我发誓有括号",
-  "Error: 0 BUG 但 12 个 未知行为",
-  "FATAL: 这行能跑，但谁也解释不了",
-  "TypeError: null.forEach is not a vibe",
-];
+const LINES = await fetch(new URL("./lines.json", import.meta.url)).then((res) => {
+  if (!res.ok) throw new Error(`lines.json ${res.status}`);
+  return res.json();
+});
 
 function pick(pool) {
+  if (!pool || !pool.length) return "";
   return pool[(Math.random() * pool.length) | 0];
+}
+
+function pickBug() {
+  return pick(LINES.bugs) || { err: "Error: unknown", fix: "fixed  unknown" };
+}
+
+function logErrorLine(skipRender) {
+  const row = pickBug();
+  state.openBugs.push(row);
+  pushLog(row.err, "err", skipRender);
+}
+
+function logFixLine(skipRender) {
+  const row = state.openBugs.shift() || pickBug();
+  pushLog(row.fix, "ok", skipRender);
 }
 
 function rollErrorGap() {
@@ -188,6 +92,21 @@ const el = {
 };
 
 const TAP_FOCUS = 0.6;
+const OUTPUT_SCALE = 0.3;
+const QUOTA_MIN = 3000;
+const QUOTA_MAX = 10000;
+
+function rollQuota() {
+  return QUOTA_MIN + Math.floor(Math.random() * (QUOTA_MAX - QUOTA_MIN + 1));
+}
+
+function writeSpeed() {
+  return rank().linesPerSec * OUTPUT_SCALE;
+}
+
+function bugSpeed() {
+  return rank().bugsPerSec * OUTPUT_SCALE;
+}
 
 const state = {
   started: false,
@@ -198,6 +117,9 @@ const state = {
   lines: 0,
   goodLines: 0,
   bugs: 0,
+  written: 0,
+  quota: 0,
+  dayDone: false,
   log: [],
   time: 0,
   last: 0,
@@ -205,6 +127,7 @@ const state = {
   lastBugShown: 0,
   lastGoodShown: 0,
   linesUntilError: 1,
+  openBugs: [],
 };
 
 function rank() {
@@ -339,9 +262,9 @@ function hurtGoodMeter() {
 function renderHud() {
   const r = rank();
   el.rank.textContent = r.name;
-  const lines = Math.floor(state.lines);
+  const written = Math.floor(state.written);
   const bugs = Math.floor(state.bugs);
-  el.lines.textContent = String(lines);
+  el.lines.textContent = String(written);
   const goods = Math.floor(state.goodLines);
   el.good.textContent = String(goods);
   el.bugs.textContent = String(bugs);
@@ -361,6 +284,9 @@ function poke() {
 
 function startGame() {
   if (state.started) return;
+  state.written = 0;
+  state.quota = rollQuota();
+  state.dayDone = false;
   state.started = true;
   unmuteVideo();
   state.linesUntilError = rollErrorGap();
@@ -372,11 +298,12 @@ function openSheet(finalQuit) {
   state.paused = true;
   state.holding = false;
   state.focusUntil = 0;
-  const lines = Math.floor(state.lines);
+  const written = Math.floor(state.written);
   const bugs = Math.floor(state.bugs);
   const good = Math.floor(state.goodLines);
   const r = rank();
-  el.sumLines.textContent = String(lines);
+  const dayDone = state.dayDone;
+  el.sumLines.textContent = String(written);
   el.sumGood.textContent = String(good);
   el.sumBugs.textContent = String(bugs);
   el.sumRank.textContent = r.name;
@@ -388,9 +315,20 @@ function openSheet(finalQuit) {
   el.stamp.classList.toggle("hidden", bugs !== 0);
   const demote = mustDemote();
   const promo = canPromote();
-  el.sheetTitle.textContent = finalQuit ? "下班" : demote ? "绩效翻车" : promo ? "绩效达标" : "收工";
+  el.sheetTitle.textContent = finalQuit
+    ? "下班"
+    : dayDone
+      ? "今日写满"
+      : demote
+        ? "绩效翻车"
+        : promo
+          ? "绩效达标"
+          : "收工";
   if (el.sheetHint) {
     if (finalQuit) el.sheetHint.textContent = "";
+    else if (dayDone && demote) el.sheetHint.textContent = `今日写满；Bug ${bugs} ≥ ${r.bugsToDown}，下一档是 ${peekTitle("down")}`;
+    else if (dayDone && promo) el.sheetHint.textContent = `今日写满；正确 ${good} ≥ ${r.goodToUp}，可去 ${peekTitle("up")}`;
+    else if (dayDone) el.sheetHint.textContent = "今日写满，自动下班";
     else if (demote) el.sheetHint.textContent = `Bug ${bugs} ≥ ${r.bugsToDown}，下一档是 ${peekTitle("down")}`;
     else if (promo) el.sheetHint.textContent = `正确 ${good} ≥ ${r.goodToUp}，可去 ${peekTitle("up")}`;
     else {
@@ -414,11 +352,19 @@ function openSheet(finalQuit) {
       up.addEventListener("click", promote);
       el.actions.append(up);
     }
-    const keep = document.createElement("button");
-    if (!demote && !promo) keep.className = "primary";
-    keep.textContent = "继续";
-    keep.addEventListener("click", continueWork);
-    el.actions.append(keep);
+    if (!dayDone) {
+      const keep = document.createElement("button");
+      if (!demote && !promo) keep.className = "primary";
+      keep.textContent = "继续";
+      keep.addEventListener("click", continueWork);
+      el.actions.append(keep);
+    } else if (!demote && !promo) {
+      const next = document.createElement("button");
+      next.className = "primary";
+      next.textContent = "下一班";
+      next.addEventListener("click", () => beginRound("// 写满，下一班", "dim"));
+      el.actions.append(next);
+    }
     const bye = document.createElement("button");
     bye.textContent = "下班";
     bye.addEventListener("click", () => openSheet(true));
@@ -435,6 +381,29 @@ function openSheet(finalQuit) {
   renderHud();
 }
 
+function beginRound(note, kind) {
+  state.holding = false;
+  state.paused = false;
+  state.lines = 0;
+  state.goodLines = 0;
+  state.bugs = 0;
+  state.written = 0;
+  state.quota = rollQuota();
+  state.dayDone = false;
+  state.log = [];
+  state.focusUntil = 0;
+  state.lastBugShown = 0;
+  state.lastGoodShown = 0;
+  state.linesUntilError = rollErrorGap();
+  state.openBugs = [];
+  el.sheet.classList.add("hidden");
+  if (el.scene) el.scene.currentTime = 0;
+  renderLog();
+  if (note) pushLog(note, kind || "dim");
+  syncVideo();
+  renderHud();
+}
+
 function continueWork() {
   state.paused = false;
   el.sheet.classList.add("hidden");
@@ -442,26 +411,26 @@ function continueWork() {
   renderHud();
 }
 
+function finishDay() {
+  if (!state.started || state.paused || state.dayDone) return;
+  state.written = state.quota;
+  state.dayDone = true;
+  pushLog("// 今日写满，自动下班", "dim");
+  openSheet(false);
+}
+
 function promote() {
   if (!canPromote() || mustDemote()) return;
   moveRank("up");
-  state.paused = false;
-  el.sheet.classList.add("hidden");
   const rail = state.track === "good" ? "正轨" : "屎山轨";
-  pushLog(`// 晋升 ${rail}·${rank().name}`, "ok");
-  syncVideo();
-  renderHud();
+  beginRound(`// 晋升 ${rail}·${rank().name}，新的一局`, "ok");
 }
 
 function demoteRank() {
   if (!mustDemote()) return;
   moveRank("down");
-  state.paused = false;
-  el.sheet.classList.add("hidden");
   const rail = state.track === "good" ? "正轨" : "屎山轨";
-  pushLog(`// 降级 ${rail}·${rank().name}`, "err");
-  syncVideo();
-  renderHud();
+  beginRound(`// 降级 ${rail}·${rank().name}，新的一局`, "err");
 }
 
 function resetRun() {
@@ -473,11 +442,15 @@ function resetRun() {
   state.lines = 0;
   state.goodLines = 0;
   state.bugs = 0;
+  state.written = 0;
+  state.quota = 0;
+  state.dayDone = false;
   state.log = [];
   state.focusUntil = 0;
   state.lastBugShown = 0;
   state.lastGoodShown = 0;
   state.linesUntilError = rollErrorGap();
+  state.openBugs = [];
   el.sheet.classList.add("hidden");
   el.intro.classList.remove("hidden");
   if (el.scene) el.scene.currentTime = 0;
@@ -501,7 +474,7 @@ function tick(now) {
         const dropped = Math.floor(before) - Math.floor(state.bugs);
         if (dropped > 0) {
           for (let i = 0; i < dropped; i += 1) {
-            pushLog(`fixed  ${pick(ERR_LINES)}`, "ok", true);
+            logFixLine(true);
           }
           renderLog();
         }
@@ -509,7 +482,7 @@ function tick(now) {
       if (state.bugs <= 0 && state.lines >= 1) {
         const prevG = state.goodLines;
         const maxConvert = Math.floor(state.lines);
-        state.goodLines += r.linesPerSec * dt;
+        state.goodLines += writeSpeed() * dt;
         let gained = Math.floor(state.goodLines) - Math.floor(prevG);
         if (gained > maxConvert) {
           state.goodLines = Math.floor(prevG) + maxConvert;
@@ -518,34 +491,42 @@ function tick(now) {
         if (gained > 0) {
           state.lines = Math.max(0, state.lines - gained);
           for (let i = 0; i < gained; i += 1) {
-            pushLog(pick(GOOD_LINES), "ok", true);
+            pushLog(pick(LINES.good), "ok", true);
           }
           renderLog();
         }
       }
     } else {
-      const prevL = state.lines;
-      const prevB = state.bugs;
-      state.lines += r.linesPerSec * dt;
-      state.bugs += r.bugsPerSec * dt;
-      const newBugs = Math.floor(state.bugs) - Math.floor(prevB);
-      if (newBugs > 0) {
-        state.goodLines = Math.max(0, state.goodLines - newBugs);
-      }
-      const newLines = Math.floor(state.lines) - Math.floor(prevL);
-      if (newLines > 0) {
-        for (let i = 0; i < newLines; i += 1) {
-          state.linesUntilError -= 1;
-          if (state.linesUntilError <= 0) {
-            pushLog(pick(ERR_LINES), "err", true);
-            state.linesUntilError = rollErrorGap();
-          } else {
-            pushLog(pick(SLOP_LINES), "dim", true);
-          }
+      const room = state.quota - state.written;
+      if (room <= 0) {
+        finishDay();
+      } else {
+        const prevL = state.lines;
+        const prevB = state.bugs;
+        const add = Math.min(writeSpeed() * dt, room);
+        state.lines += add;
+        state.written += add;
+        state.bugs += bugSpeed() * dt;
+        const newBugs = Math.floor(state.bugs) - Math.floor(prevB);
+        if (newBugs > 0) {
+          state.goodLines = Math.max(0, state.goodLines - newBugs);
         }
-        renderLog();
+        const newLines = Math.floor(state.lines) - Math.floor(prevL);
+        if (newLines > 0) {
+          for (let i = 0; i < newLines; i += 1) {
+            state.linesUntilError -= 1;
+            if (state.linesUntilError <= 0) {
+              logErrorLine(true);
+              state.linesUntilError = rollErrorGap();
+            } else {
+              pushLog(pick(LINES.slop), "dim", true);
+            }
+          }
+          renderLog();
+        }
+        state.goodLines = Math.max(0, state.goodLines);
+        if (state.written >= state.quota) finishDay();
       }
-      state.goodLines = Math.max(0, state.goodLines);
     }
   }
 
@@ -597,6 +578,7 @@ state.last = performance.now();
 if (el.scene) {
   const video = el.scene;
   video.playsInline = true;
+  video.loop = true;
   video.muted = true;
   video.setAttribute("playsinline", "");
   video.setAttribute("webkit-playsinline", "");
@@ -605,9 +587,10 @@ if (el.scene) {
     fitScene();
     if (!state.paused) syncVideo();
   });
-  video.addEventListener("timeupdate", () => {
-    if (!video.duration || video.paused) return;
-    if (video.duration - video.currentTime < 0.08) video.currentTime = 0.05;
+  video.addEventListener("ended", () => {
+    if (state.paused) return;
+    video.currentTime = 0;
+    syncVideo();
   });
   syncVideo();
 }

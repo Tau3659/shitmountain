@@ -1,0 +1,200 @@
+{
+  "slop": [
+    "function foo() { return foo() }",
+    "const x = x ?? x ?? x",
+    "if (true) if (true) if (true) {}",
+    "eval(userInput) // 没事的",
+    "copy(); paste(); copy(); paste();",
+    "git push --force origin main",
+    "TODO: 以后再改",
+    "catch (e) { /* ignore */ }",
+    "setInterval(run, 1)",
+    "document.write(innerHTML)",
+    "let a = 1; a = a = a",
+    "while (true) console.log('ok')",
+    "undefined.doThing()",
+    "password = '123456'",
+    "new Array(999999).fill(0)",
+    "// 临时方案 2019",
+    "fix fix fix asdf",
+    "export default null",
+    "await fetch('/api').then(r => r) // 没处理",
+    "if (data) if (data.data) if (data.data.data) use(data.data.data.item)",
+    "JSON.parse(localStorage.user) // 可能炸",
+    "setTimeout(save, 0); setTimeout(save, 0); setTimeout(save, 0)",
+    "return res.data.data.data.list || res || []",
+    "obj['__proto__'] = obj",
+    "for (var i = 0; i < 10; i++) { i = 0 }",
+    "console.log('debug', secretKey, token, pwd)",
+    "window.location = userUrl",
+    "document.cookie = 'admin=1; path=/'",
+    "Number(undefined) + Number(null) * '2'",
+    "try { risky() } finally { risky() }",
+    "new Date(userDate).getTime() || Date.now() || 0 || 1",
+    "arr[-1] = '垫一下'",
+    "Promise.resolve().then(() => Promise.resolve().then(loop))",
+    "cssText += 'position:fixed;' // 先顶上去",
+    "innerHTML = comment + userName",
+    "Math.random() * 0 // 够随机了",
+    "if (count == '0') count = 0; else count = count",
+    "export const API = 'http://10.0.0.3:8080'",
+    "void function(){ arguments.callee() }()",
+    "let lock = false; lock = !lock; lock = !lock",
+    "switch (type) { default: break; default: break }",
+    "fs.writeFileSync('/tmp/prod.json', JSON.stringify(state))",
+    "user.age = user.age || user.Age || user.AGE || 18",
+    "parseInt('08') + parseInt('09')",
+    "typeof NaN === 'number' && NaN == NaN",
+    "btn.onclick = btn.onclick = btn.onclick = save",
+    "// 线上先这样，周五再清",
+    "throw '别问，问就是历史包袱'",
+    "merge(a, merge(a, merge(a, b)))",
+    "cache[key] = cache[key] || cache[key] || uncached()",
+    "id = id || ids[0] || ids[ids.length] || 'id'",
+    "sleep(5000) // 等接口自己好"
+  ],
+  "good": [
+    "const total = items.reduce((s, n) => s + n, 0)",
+    "if (!node) return null",
+    "el.addEventListener('click', onTap)",
+    "return { ok: true, data }",
+    "const next = Math.max(0, n - 1)",
+    "try { await load() } catch (e) { log(e) }",
+    "export function clamp(v, a, b)",
+    "query.selectAll('.bug').forEach(fix)",
+    "const safe = Number.isFinite(n) ? n : 0",
+    "if (!res.ok) throw new Error(res.statusText)",
+    "return structuredClone(state)",
+    "el.setAttribute('aria-live', 'polite')",
+    "const key = encodeURIComponent(raw)",
+    "await mutex.runExclusive(write)",
+    "if (signal.aborted) return",
+    "const id = crypto.randomUUID()",
+    "return lines.filter((row) => row.trim())",
+    "const url = new URL(path, origin)",
+    "queueMicrotask(() => flush())",
+    "map.set(id, Object.freeze(item))",
+    "for (const row of rows) yield transform(row)",
+    "const html = escape(text)",
+    "db.prepare('SELECT * FROM bugs WHERE id = ?').get(id)",
+    "requestAnimationFrame(tick)",
+    "const left = Math.max(0, budget - used)",
+    "headers.set('Content-Type', 'application/json')",
+    "if (bugs === 0) return rewrite(lines)",
+    "test('clamp', () => expect(clamp(-1, 0, 1)).toBe(0))"
+  ],
+  "bugs": [
+    {
+      "err": "TypeError: Cannot read properties of undefined",
+      "fix": "fixed  foo?.bar ?? fallback  // 先确认它活着"
+    },
+    {
+      "err": "ReferenceError: bug is not defined",
+      "fix": "fixed  const bug = findBug()  // 先声明再骂它"
+    },
+    {
+      "err": "FATAL: 屎山局部坍塌",
+      "fix": "fixed  if (!pile) return  // 坍塌被挡在门口"
+    },
+    {
+      "err": "Error: expected {, saw 💩",
+      "fix": "fixed  换成 {  // 💩 请走注释通道"
+    },
+    {
+      "err": "UnhandledPromiseRejection: 又双叒崩了",
+      "fix": "fixed  .catch((e) => log(e))  // 崩完还能讲出来"
+    },
+    {
+      "err": "SyntaxError: Unexpected token ; ; ;",
+      "fix": "fixed  删掉多余分号  // 只留一个活口"
+    },
+    {
+      "err": "RangeError: Maximum call stack size exceeded",
+      "fix": "fixed  递归加了出口  // 不再自己 call 自己到天亮"
+    },
+    {
+      "err": "Warning: 这段代码有自己的想法",
+      "fix": "fixed  抽成纯函数  // 想法收编进参数"
+    },
+    {
+      "err": "Error: ECONNRESET prod-db 被谁 rm 了",
+      "fix": "fixed  只读副本顶上  // prod-db 先停刑"
+    },
+    {
+      "err": "TypeError: foo is not a function, foo is foo",
+      "fix": "fixed  typeof foo === 'function' && foo()  // foo 先证明自己"
+    },
+    {
+      "err": "FATAL: git 拒绝覆盖同事的周末",
+      "fix": "fixed  git pull --rebase  // 周末得以保全"
+    },
+    {
+      "err": "Error: Cannot find module './utils/utils/utils'",
+      "fix": "fixed  import from './utils'  // 少绕两层迷宫"
+    },
+    {
+      "err": "Warning: setState on unmounted 情绪",
+      "fix": "fixed  if (!alive) return  // 情绪不再 setState"
+    },
+    {
+      "err": "SyntaxError: Unexpected end of JSON in 注释里",
+      "fix": "fixed  JSON.parse 只吃字符串  // 注释请滚去 //"
+    },
+    {
+      "err": "Error: 401 但本地 token 还活着",
+      "fix": "fixed  刷新 token 再请求  // 本地活着不算数"
+    },
+    {
+      "err": "RangeError: Invalid array length 999999999",
+      "fix": "fixed  new Array(Math.min(n, 1024))  // 长度先限速"
+    },
+    {
+      "err": "TypeError: Assignment to constant 临时变量",
+      "fix": "fixed  let tmp = value  // 临时变量终于能变"
+    },
+    {
+      "err": "Error: timeout of 0ms exceeded",
+      "fix": "fixed  timeout: 8000  // 0ms 对谁都不礼貌"
+    },
+    {
+      "err": "Warning: 循环依赖把自己 import 进来了",
+      "fix": "fixed  拆出 types.js  // 自己不再 import 自己"
+    },
+    {
+      "err": "FATAL: 构建过了，人没过",
+      "fix": "fixed  补了测试才合  // 人和构建一起过"
+    },
+    {
+      "err": "Error: ENOENT /the/file/we/swore/was-there.js",
+      "fix": "fixed  existsSync 后再读  // 发誓改成检查"
+    },
+    {
+      "err": "Unhandled: then() 里又 then() 里又 then()",
+      "fix": "fixed  async/await 摊平  // then 金字塔拆了"
+    },
+    {
+      "err": "Error: CORS 把锅甩给前端",
+      "fix": "fixed  Access-Control-Allow-Origin  // 锅送回网关"
+    },
+    {
+      "err": "Warning: memory leak 从 2019 活到现在",
+      "fix": "fixed  removeEventListener  // 2019 的监听下班了"
+    },
+    {
+      "err": "SyntaxError: missing ) after 我发誓有括号",
+      "fix": "fixed  补上 )  // 发誓无效，括号有效"
+    },
+    {
+      "err": "Error: 0 BUG 但 12 个 未知行为",
+      "fix": "fixed  未知行为写成测试  // 0 BUG 不再装死"
+    },
+    {
+      "err": "FATAL: 这行能跑，但谁也解释不了",
+      "fix": "fixed  重写成能讲的版本  // 能跑也能解释"
+    },
+    {
+      "err": "TypeError: null.forEach is not a vibe",
+      "fix": "fixed  (list ?? []).forEach  // vibe 建立在数组上"
+    }
+  ]
+}

@@ -15,6 +15,7 @@
       <video
         id="scene"
         src="video/scene.mp4"
+        loop
         muted
         playsinline
         webkit-playsinline
@@ -38,7 +39,7 @@
     <div class="monitor" aria-hidden="true">
       <div class="bezel">
         <div class="meters">
-          <div class="meter meter-lines"><span class="lab">代码行数</span><span id="lines">0</span></div>
+          <div class="meter meter-lines"><span class="lab">代码总行数</span><span id="lines">0</span></div>
           <div class="meter meter-good" id="good-wrap"><span class="lab">正确</span><span id="good">0</span></div>
           <div class="meter meter-bugs" id="bugs-wrap"><span class="lab">Bug</span><span id="bugs">0</span></div>
         </div>
@@ -73,7 +74,7 @@
         <li><span>下一档</span><strong id="sum-next">初级</strong></li>
         <li><span>晋升需正确</span><strong id="sum-need-good">40</strong></li>
         <li><span>降级线 Bug</span><strong id="sum-need-bugs">35</strong></li>
-        <li><span>代码行数</span><strong id="sum-lines">0</strong></li>
+        <li><span>代码总行数</span><strong id="sum-lines">0</strong></li>
         <li><span>正确行数</span><strong id="sum-good">0</strong></li>
         <li><span>Bug</span><strong id="sum-bugs">0</strong></li>
       </ul>

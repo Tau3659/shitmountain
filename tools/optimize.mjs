@@ -122,7 +122,8 @@ function uniqueText(raw) {
 async function subsetGlyphs() {
   const html = await readFile(path.join(root, "index.html"), "utf8");
   const js = await readFile(path.join(root, "js/main.js"), "utf8");
-  const text = uniqueText(html + js);
+  const lines = await readFile(path.join(root, "js/lines.json"), "utf8");
+  const text = uniqueText(html + js + lines);
   const src = path.join(root, "fonts/fusion-pixel-12.woff2");
   const before = (await readFile(src)).byteLength;
   const out = await subsetFont(await readFile(src), text, { targetFormat: "woff2" });
@@ -130,6 +131,6 @@ async function subsetGlyphs() {
   console.log(`font ${kb(before)} -> ${kb(out.byteLength)} (${text.length} glyphs)`);
 }
 
-await compressImages();
+if (!process.env.SKIP_IMAGES) await compressImages();
 await subsetGlyphs();
 if (!process.env.SKIP_VIDEO) await compressVideo();

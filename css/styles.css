@@ -208,12 +208,17 @@ button {
 .meter #bugs {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meter-lines {
+  flex: 1.45;
 }
 
 .meter-lines,
 .meter-lines .lab,
 .meter-lines #lines {
-  color: #d0d4d8;
+  color: var(--text);
 }
 
 .meter-good,
