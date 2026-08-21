@@ -296,6 +296,15 @@ button {
   font-size: 12px;
   line-height: 1.2;
   color: var(--ok);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.console > div {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .scanlines {

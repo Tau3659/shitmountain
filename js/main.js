@@ -199,9 +199,24 @@ function syncVideo() {
   if (play) play.catch(() => {});
 }
 
+function logCapacity() {
+  const box = el.cons;
+  if (!box) return 24;
+  const styles = getComputedStyle(box);
+  const pad = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+  const line = parseFloat(styles.lineHeight) || 14.4;
+  const inner = box.clientHeight - pad;
+  return Math.max(1, Math.floor(inner / line));
+}
+
+function trimLog() {
+  const cap = logCapacity();
+  if (state.log.length > cap) state.log.splice(0, state.log.length - cap);
+}
+
 function pushLog(text, kind) {
   state.log.push({ text, kind });
-  if (state.log.length > 24) state.log.shift();
+  trimLog();
   renderLog();
 }
 
@@ -209,7 +224,6 @@ function renderLog() {
   el.cons.innerHTML = state.log
     .map((row) => `<div class="${row.kind}">${row.text}</div>`)
     .join("");
-  el.cons.scrollTop = el.cons.scrollHeight;
 }
 
 function hopBugMeter() {
@@ -419,6 +433,11 @@ window.addEventListener("keydown", (ev) => {
   ev.preventDefault();
   if (!state.started) startGame();
   poke();
+});
+
+window.addEventListener("resize", () => {
+  trimLog();
+  renderLog();
 });
 
 renderHud();
