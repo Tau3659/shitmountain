@@ -52,14 +52,19 @@
   </div>
 
   <div id="intro" class="overlay intro">
+    <button type="button" id="intro-settings" class="settings-btn" aria-label="设置">
+      <img src="assets/settings.webp" width="40" height="40" alt="" draggable="false" />
+    </button>
     <img class="intro-scene" src="assets/intro-scene.webp" alt="" draggable="false" fetchpriority="high" />
     <div class="intro-ui">
       <div class="intro-stack">
         <img class="intro-title" src="assets/intro-title.webp" alt="SHITMOUNTAIN CODE" draggable="false" />
-        <button type="button" id="intro-start" class="intro-start" aria-label="START CODING">
-          <img src="assets/intro-start.webp" alt="" draggable="false" />
+        <button type="button" id="intro-start" class="intro-start" aria-label="开始编程">
+          <span class="intro-start-label" aria-hidden="true">
+            <img class="intro-start-zh" src="assets/intro-start-zh.webp" alt="" draggable="false" />
+          </span>
         </button>
-        <img class="intro-hint" src="assets/intro-hint.webp" alt="TAP SCREEN TO FIX BUGS" draggable="false" />
+        <img class="intro-hint" src="assets/intro-hint.webp" alt="点击屏幕修复BUG代码" draggable="false" />
       </div>
     </div>
   </div>

@@ -79,7 +79,22 @@ async function compressImages() {
     {
       src: "assets/intro-title.png",
       dest: "assets/intro-title.webp",
-      fn: (img) => img.webp({ quality: 82, effort: 6 }),
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
+    },
+    {
+      src: "assets/intro-start-bg.png",
+      dest: "assets/intro-start-bg.webp",
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
+    },
+    {
+      src: "assets/intro-start-zh.png",
+      dest: "assets/intro-start-zh.webp",
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
+    },
+    {
+      src: "assets/intro-start-en.png",
+      dest: "assets/intro-start-en.webp",
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
     },
     {
       src: "assets/intro-start.png",
@@ -87,9 +102,19 @@ async function compressImages() {
       fn: (img) => img.resize(480, null, { kernel: "nearest" }).webp({ quality: 82, effort: 6 }),
     },
     {
+      src: "assets/settings.png",
+      dest: "assets/settings.webp",
+      fn: (img) => img.resize(120, 120, { kernel: "nearest" }).webp({ quality: 90, effort: 6 }),
+    },
+    {
       src: "assets/intro-hint.png",
       dest: "assets/intro-hint.webp",
-      fn: (img) => img.webp({ quality: 82, effort: 6 }),
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
+    },
+    {
+      src: "assets/intro-hint-en.png",
+      dest: "assets/intro-hint-en.webp",
+      fn: (img) => img.webp({ quality: 90, effort: 6 }),
     },
     {
       src: "img/face.png",

@@ -46,6 +46,8 @@ function pickBug() {
 function logErrorLine(skipRender) {
   const row = pickBug();
   state.openBugs.push(row);
+  state.bugs += 1;
+  state.goodLines = Math.max(0, state.goodLines - 1);
   pushLog(row.err, "err", skipRender);
 }
 
@@ -75,6 +77,8 @@ const el = {
   stage: document.querySelector(".stage"),
   cons: document.getElementById("console"),
   intro: document.getElementById("intro"),
+  introStart: document.getElementById("intro-start"),
+  settings: document.getElementById("intro-settings"),
   sheet: document.getElementById("sheet"),
   sheetTitle: document.getElementById("sheet-title"),
   sumLines: document.getElementById("sum-lines"),
@@ -102,10 +106,6 @@ function rollQuota() {
 
 function writeSpeed() {
   return rank().linesPerSec * OUTPUT_SCALE;
-}
-
-function bugSpeed() {
-  return rank().bugsPerSec * OUTPUT_SCALE;
 }
 
 const state = {
@@ -502,15 +502,9 @@ function tick(now) {
         finishDay();
       } else {
         const prevL = state.lines;
-        const prevB = state.bugs;
         const add = Math.min(writeSpeed() * dt, room);
         state.lines += add;
         state.written += add;
-        state.bugs += bugSpeed() * dt;
-        const newBugs = Math.floor(state.bugs) - Math.floor(prevB);
-        if (newBugs > 0) {
-          state.goodLines = Math.max(0, state.goodLines - newBugs);
-        }
         const newLines = Math.floor(state.lines) - Math.floor(prevL);
         if (newLines > 0) {
           for (let i = 0; i < newLines; i += 1) {
@@ -524,7 +518,6 @@ function tick(now) {
           }
           renderLog();
         }
-        state.goodLines = Math.max(0, state.goodLines);
         if (state.written >= state.quota) finishDay();
       }
     }
@@ -538,17 +531,44 @@ function isClockOutTarget(target) {
   return !!(target && (target === el.clockOut || el.clockOut.contains(target)));
 }
 
+function isSettingsTarget(target) {
+  return !!(target && el.settings && (target === el.settings || el.settings.contains(target)));
+}
+
 function onDown(ev) {
   if (isClockOutTarget(ev.target)) return;
+  if (isSettingsTarget(ev.target)) return;
   if (el.sheet.contains(ev.target)) return;
+  if (!state.started) return;
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
   ev.preventDefault();
-  if (!state.started) startGame();
   poke();
 }
 
 el.app.addEventListener("pointerdown", onDown);
-el.intro.addEventListener("pointerdown", onDown);
+
+if (el.introStart) {
+  el.introStart.addEventListener("pointerdown", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+  el.introStart.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    startGame();
+  });
+}
+
+if (el.settings) {
+  el.settings.addEventListener("pointerdown", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+  el.settings.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+  });
+}
 
 el.clockOut.addEventListener("pointerdown", (ev) => {
   ev.preventDefault();
@@ -563,8 +583,8 @@ el.clockOut.addEventListener("click", (ev) => {
 
 window.addEventListener("keydown", (ev) => {
   if (ev.code !== "Space" || ev.repeat) return;
+  if (!state.started) return;
   ev.preventDefault();
-  if (!state.started) startGame();
   poke();
 });
 
