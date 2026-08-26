@@ -507,7 +507,7 @@ button {
     var(--panel-border-right)
     var(--panel-border-bottom)
     var(--panel-border-left);
-  border-image-source: url("../assets/panel-9.webp");
+  border-image-source: url("data:image/webp;base64,UklGRpQAAABXRUJQVlA4TIcAAAAvFUAEEIWr2rZVZaV5D3e3T7cELo38QlrY4+4KEUwaSRI0aAwsW3RSFj16/3aKYJImt2cIobAokX/FfQD0/yC4igoCgDJyO4bF05FVApbFzZalbVjanKWNWQlpxNJ6LK3J0nJcORJyquIyEgDLcEDCADiG8vhg8fEooTyO3+B+J4QyrMFQQgAA");
   border-image-slice: 4 6 6 6 fill;
   border-image-width:
     var(--panel-border-top)
