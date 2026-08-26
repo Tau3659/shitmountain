@@ -15,6 +15,13 @@
   --muted: #8b9094;
   --ok: #48d060;
   --bad: #d45a4a;
+  --promote: #48d060;
+  --demote: #d45a4a;
+  --text-on-promote: #f2fff4;
+  --text-on-demote: #fff4f2;
+  --panel-9: url("data:image/webp;base64,UklGRpQAAABXRUJQVlA4TIcAAAAvFUAEEIWr2rZVZaV5D3e3T7cELo38QlrY4+4KEUwaSRI0aAwsW3RSFj16/3aKYJImt2cIobAokX/FfQD0/yC4igoCgDJyO4bF05FVApbFzZalbVjanKWNWQlpxNJ6LK3J0nJcORJyquIyEgDLcEDCADiG8vhg8fEooTyO3+B+J4QyrMFQQgAA");
+  --panel-9-primary: url("data:image/webp;base64,UklGRsYAAABXRUJQVlA4TLkAAAAvFUAEEN+gtpGkNjmPdzGFEIO2bdsmJSXt3EOqoG0bNpd2l8FQzEjbSEV79B7eP32DAYDAggGBA4HA/3cKlpWWVa0VRqFrZ0s3jMK9qxW69v6Lk9ImWShwGEmyqpw82cfD/UH+icLW3xQi+k8wSZPbM2YOyY3+3fYB/P+1npvWAjzocpF4P6Q9MvG6S9xN4q4Sd5EGdZa4k8QdJW6qJoV52LYbQEYFhgDU8NIgteLmpXah/m7mkUK4GQA=");
+  --panel-9-danger: url("data:image/webp;base64,UklGRsYAAABXRUJQVlA4TLoAAAAvFUAEEN+goG0bNpi2OwQGY2obSWqDg/cpjRCjqG0jOZZe810ga6RtpKI9eg/vn77BAEBgwYDAgUDg7z/KUBJXcxE3STdXqxNukm57j5u42r+vw1QYBxGDw0iSVeXkyT4e7g/yTxS2/qYQ0X+CSZrcnjFzSG7077YP4P+v9dy0FuBBl4vE+yHtkYnXXeJuEneVuIs0qLPEnSTuKHFTNSnMw7bdADIqMASghpcGqRU3L7UL9XczjxTCzQA=");
   --warn: #d4b45a;
   --crt: #a8d4e8;
   --danger-bg: #3a1c1c;
@@ -56,6 +63,8 @@ html, body {
   position: fixed;
   inset: 0;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
   height: 100dvh;
   overflow: hidden;
@@ -86,6 +95,9 @@ button {
   inset: 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   touch-action: none;
   overflow: hidden;
   background: var(--bg);
@@ -192,13 +204,16 @@ button {
   justify-content: space-between;
   align-items: stretch;
   flex: 0 0 auto;
+  min-width: 0;
+  width: 100%;
   font-size: 12px;
-  overflow: visible;
+  overflow: hidden;
   gap: 6px;
 }
 
 .meter {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -208,11 +223,14 @@ button {
   border: 2px solid var(--edge);
   box-shadow: var(--bevel-in);
   padding: 6px 6px 8px;
+  overflow: hidden;
 }
 
 .meter .lab {
   font-size: 12px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .meter .lab,
@@ -222,10 +240,20 @@ button {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .meter-lines {
-  flex: 1.45;
+  flex: 4 1 0;
+}
+
+.meter-good {
+  flex: 3 1 0;
+}
+
+.meter-bugs {
+  flex: 3 1 0;
 }
 
 .meter-lines,
@@ -280,13 +308,18 @@ button {
 .monitor {
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   pointer-events: none;
   padding: 0 calc(8px + var(--safe-right)) calc(8px + var(--safe-bottom)) calc(8px + var(--safe-left));
   display: flex;
 }
 
 .bezel {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -301,6 +334,8 @@ button {
   position: relative;
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  width: 100%;
   overflow: hidden;
   background: #03140a;
   border: 2px solid var(--lo);
@@ -311,6 +346,8 @@ button {
   position: relative;
   z-index: 1;
   height: 100%;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
   padding: 8px;
   font-size: var(--console-font);
@@ -323,8 +360,10 @@ button {
 
 .console > div {
   flex: 0 0 auto;
-  white-space: nowrap;
-  overflow: hidden;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 .scanlines {
@@ -342,6 +381,14 @@ button {
 .console .err { color: var(--bad); }
 .console .ok { color: var(--ok); }
 .console .dim { color: #3d5a42; }
+
+.console .bug-mark {
+  display: inline-block;
+  margin-right: 8px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+  font-style: normal;
+  line-height: 1;
+}
 
 .overlay {
   position: fixed;
@@ -498,7 +545,8 @@ button {
 }
 
 .pixel-panel,
-.sheet-card {
+.sheet-card,
+.sheet-actions button {
   box-sizing: border-box;
   border-style: solid;
   border-color: transparent;
@@ -507,7 +555,7 @@ button {
     var(--panel-border-right)
     var(--panel-border-bottom)
     var(--panel-border-left);
-  border-image-source: url("data:image/webp;base64,UklGRpQAAABXRUJQVlA4TIcAAAAvFUAEEIWr2rZVZaV5D3e3T7cELo38QlrY4+4KEUwaSRI0aAwsW3RSFj16/3aKYJImt2cIobAokX/FfQD0/yC4igoCgDJyO4bF05FVApbFzZalbVjanKWNWQlpxNJ6LK3J0nJcORJyquIyEgDLcEDCADiG8vhg8fEooTyO3+B+J4QyrMFQQgAA");
+  border-image-source: var(--panel-9);
   border-image-slice: 4 6 6 6 fill;
   border-image-width:
     var(--panel-border-top)
@@ -550,26 +598,6 @@ button {
   color: var(--warn);
 }
 
-.stamp {
-  margin: 12px auto 0;
-  width: 72px;
-  height: 72px;
-  border: 2px solid var(--ok);
-  color: var(--ok);
-  background: #102014;
-  box-shadow: inset 2px 2px 0 #1a3a20, inset -2px -2px 0 #061008, 0 0 0 2px var(--ok);
-  outline: 2px solid var(--ok);
-  outline-offset: -8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  line-height: 1.2;
-  text-align: center;
-}
-
-.stamp.hidden { display: none; }
-
 .sheet-actions {
   display: flex;
   justify-content: center;
@@ -579,40 +607,32 @@ button {
 }
 
 .sheet-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font: inherit;
   font-size: 12px;
-  padding: 10px 12px;
-  min-width: 44px;
-  min-height: 44px;
-  border: 2px solid var(--edge);
-  background: var(--panel);
+  line-height: 1;
+  padding: 0 12px;
+  min-width: 72px;
+  height: var(--hud-face);
   color: var(--text);
-  box-shadow: var(--bevel), var(--bevel-out);
   cursor: pointer;
 }
 
-.sheet-hint {
-  margin: 8px 0 0;
-  min-height: 1.2em;
-  font-size: 12px;
-  color: var(--muted);
-  text-align: center;
+.pixel-panel.primary {
+  border-image-source: var(--panel-9-primary);
+  color: var(--text-on-promote);
 }
 
-.sheet-actions button.primary {
-  background: #1a3a20;
-  color: var(--ok);
-  border-color: var(--ok);
+.pixel-panel.danger {
+  border-image-source: var(--panel-9-danger);
+  color: var(--text-on-demote);
 }
 
-.sheet-actions button.danger {
-  background: var(--danger-bg);
-  color: var(--bad);
-  border-color: var(--bad);
-}
-
-.sheet-actions button:active {
-  box-shadow: var(--bevel-in);
+.sheet-actions button:active,
+.clock-out:active {
+  filter: brightness(0.88);
 }
 
 .rotate-hint {

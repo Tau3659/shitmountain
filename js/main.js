@@ -48,7 +48,7 @@ function logErrorLine(skipRender) {
   state.openBugs.push(row);
   state.bugs += 1;
   state.goodLines = Math.max(0, state.goodLines - 1);
-  pushLog(row.err, "err", skipRender);
+  pushLog(row.err, "err", skipRender, true);
 }
 
 function logFixLine(skipRender) {
@@ -83,15 +83,9 @@ const el = {
   sheetTitle: document.getElementById("sheet-title"),
   sumLines: document.getElementById("sum-lines"),
   sumBugs: document.getElementById("sum-bugs"),
-  stamp: document.getElementById("clear-stamp"),
   actions: document.getElementById("sheet-actions"),
-  sumRank: document.getElementById("sum-rank"),
-  sumNext: document.getElementById("sum-next"),
-  sumPrev: document.getElementById("sum-prev"),
-  sumTrack: document.getElementById("sum-track"),
   sumNeedGood: document.getElementById("sum-need-good"),
   sumNeedBugs: document.getElementById("sum-need-bugs"),
-  sheetHint: document.getElementById("sheet-hint"),
   sumGood: document.getElementById("sum-good"),
 };
 
@@ -132,19 +126,6 @@ const state = {
 
 function rank() {
   return TRACKS[state.track][state.rank];
-}
-
-function peekTitle(dir) {
-  if (dir === "up") {
-    if (state.track === "good") {
-      return state.rank < 9 ? TRACKS.good[state.rank + 1].name : "满级";
-    }
-    return state.rank === 0 ? TRACKS.good[0].name : TRACKS.bad[state.rank - 1].name;
-  }
-  if (state.track === "bad") {
-    return state.rank < 9 ? TRACKS.bad[state.rank + 1].name : "已经沉底";
-  }
-  return state.rank === 0 ? TRACKS.bad[0].name : TRACKS.good[state.rank - 1].name;
 }
 
 function canPromote() {
@@ -228,20 +209,27 @@ function logCapacity() {
 }
 
 function trimLog() {
-  const cap = logCapacity();
+  const cap = Math.max(1, logCapacity() * 4);
   if (state.log.length > cap) state.log.splice(0, state.log.length - cap);
 }
 
-function pushLog(text, kind, skipRender) {
-  state.log.push({ text, kind });
+function logHtml(row) {
+  const mark = row.warn ? `<span class="bug-mark" aria-hidden="true">⚠️</span>` : "";
+  return `<div class="${row.kind}">${mark}${row.text}</div>`;
+}
+
+function pushLog(text, kind, skipRender, warn) {
+  state.log.push({ text, kind, warn: !!warn });
   trimLog();
   if (!skipRender) renderLog();
 }
 
 function renderLog() {
-  el.cons.innerHTML = state.log
-    .map((row) => `<div class="${row.kind}">${row.text}</div>`)
-    .join("");
+  el.cons.innerHTML = state.log.map(logHtml).join("");
+  while (state.log.length > 1 && el.cons.scrollHeight > el.cons.clientHeight + 1) {
+    state.log.shift();
+    el.cons.innerHTML = state.log.map(logHtml).join("");
+  }
 }
 
 function hopBugMeter() {
@@ -306,13 +294,8 @@ function openSheet(finalQuit) {
   el.sumLines.textContent = String(written);
   el.sumGood.textContent = String(good);
   el.sumBugs.textContent = String(bugs);
-  el.sumRank.textContent = r.name;
-  el.sumTrack.textContent = state.track === "good" ? "正轨" : "屎山轨";
-  el.sumNext.textContent = peekTitle("up");
-  el.sumPrev.textContent = peekTitle("down");
   el.sumNeedGood.textContent = r.goodToUp == null ? "—" : String(r.goodToUp);
   el.sumNeedBugs.textContent = r.bugsToDown == null ? "—" : String(r.bugsToDown);
-  el.stamp.classList.toggle("hidden", bugs !== 0);
   const demote = mustDemote();
   const promo = canPromote();
   el.sheetTitle.textContent = finalQuit
@@ -324,54 +307,42 @@ function openSheet(finalQuit) {
         : promo
           ? "绩效达标"
           : "收工";
-  if (el.sheetHint) {
-    if (finalQuit) el.sheetHint.textContent = "";
-    else if (dayDone && demote) el.sheetHint.textContent = `今日写满；Bug ${bugs} ≥ ${r.bugsToDown}，下一档是 ${peekTitle("down")}`;
-    else if (dayDone && promo) el.sheetHint.textContent = `今日写满；正确 ${good} ≥ ${r.goodToUp}，可去 ${peekTitle("up")}`;
-    else if (dayDone) el.sheetHint.textContent = "今日写满，自动下班";
-    else if (demote) el.sheetHint.textContent = `Bug ${bugs} ≥ ${r.bugsToDown}，下一档是 ${peekTitle("down")}`;
-    else if (promo) el.sheetHint.textContent = `正确 ${good} ≥ ${r.goodToUp}，可去 ${peekTitle("up")}`;
-    else {
-      const needG = r.goodToUp == null ? "已满级" : `正确还差 ${Math.max(0, r.goodToUp - good)}`;
-      const needB = r.bugsToDown == null ? "已沉底" : `Bug 距降级 ${Math.max(0, r.bugsToDown - bugs)}`;
-      el.sheetHint.textContent = `${needG}；${needB}`;
-    }
-  }
   el.actions.innerHTML = "";
   if (!finalQuit) {
     if (demote) {
       const down = document.createElement("button");
-      down.className = "danger";
+      down.className = "pixel-panel danger";
       down.textContent = "降级";
       down.addEventListener("click", demoteRank);
       el.actions.append(down);
     } else if (promo) {
       const up = document.createElement("button");
-      up.className = "primary";
+      up.className = "pixel-panel primary";
       up.textContent = "晋升";
       up.addEventListener("click", promote);
       el.actions.append(up);
     }
     if (!dayDone) {
       const keep = document.createElement("button");
-      if (!demote && !promo) keep.className = "primary";
+      keep.className = !demote && !promo ? "pixel-panel primary" : "pixel-panel";
       keep.textContent = "继续";
       keep.addEventListener("click", continueWork);
       el.actions.append(keep);
     } else if (!demote && !promo) {
       const next = document.createElement("button");
-      next.className = "primary";
+      next.className = "pixel-panel primary";
       next.textContent = "下一班";
       next.addEventListener("click", () => beginRound("// 写满，下一班", "dim"));
       el.actions.append(next);
     }
     const bye = document.createElement("button");
+    bye.className = "pixel-panel";
     bye.textContent = "下班";
     bye.addEventListener("click", () => openSheet(true));
     el.actions.append(bye);
   } else {
     const again = document.createElement("button");
-    again.className = "primary";
+    again.className = "pixel-panel primary";
     again.textContent = "再来一局";
     again.addEventListener("click", resetRun);
     el.actions.append(again);
