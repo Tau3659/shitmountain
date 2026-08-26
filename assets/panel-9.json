@@ -1,0 +1,33 @@
+{
+  "scale": 1,
+  "displayScale": 2,
+  "sheet": {
+    "width": 22,
+    "height": 18
+  },
+  "slice": {
+    "top": 4,
+    "right": 6,
+    "bottom": 6,
+    "left": 6
+  },
+  "display": {
+    "top": 8,
+    "right": 12,
+    "bottom": 12,
+    "left": 12
+  },
+  "borderImageSlice": "4 6 6 6 fill",
+  "borderImageWidth": "8px 12px 12px 12px",
+  "tiles": [
+    "左上.png",
+    "顶中.png",
+    "右上.png",
+    "左中.png",
+    "中.png",
+    "右中.png",
+    "左下.png",
+    "底中.png",
+    "右下.png"
+  ]
+}
